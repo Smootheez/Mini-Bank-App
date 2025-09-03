@@ -3,7 +3,7 @@ package dev.smootheez.minibankapp.common;
 import java.math.*;
 import java.util.*;
 
-public record Money(BigDecimal amount, Currency currency) {
+public record Money(BigDecimal amount, SupportedCurrency currency) {
     public Money {
         Objects.requireNonNull(amount, "Amount cannot be null");
         Objects.requireNonNull(currency, "Currency cannot be null");
