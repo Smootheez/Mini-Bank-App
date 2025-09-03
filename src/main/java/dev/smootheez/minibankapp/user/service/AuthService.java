@@ -1,0 +1,78 @@
+package dev.smootheez.minibankapp.user.service;
+
+import dev.smootheez.minibankapp.jwt.service.*;
+import dev.smootheez.minibankapp.user.*;
+import dev.smootheez.minibankapp.user.entity.*;
+import dev.smootheez.minibankapp.user.exception.*;
+import dev.smootheez.minibankapp.user.repository.*;
+import dev.smootheez.minibankapp.user.request.*;
+import dev.smootheez.minibankapp.user.response.*;
+import lombok.*;
+import lombok.extern.slf4j.*;
+import org.springframework.security.authentication.*;
+import org.springframework.security.core.*;
+import org.springframework.security.crypto.password.*;
+import org.springframework.stereotype.*;
+
+import java.math.*;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class AuthService {
+    private final UserRepository userRepository;
+    private final JwtService jwtService;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+
+    public AuthResponse register(RegisterRequest registerRequest) {
+        String email = registerRequest.getEmail();
+        if (userRepository.existsByEmail(email))
+            throw new UserAlreadyExistException("User with email " + email + " already exists");
+
+        UserEntity user = new UserEntity();
+        user.setEmail(email);
+        user.setBalance(new BigDecimal(0));
+        user.setFirstName(registerRequest.getFirstName());
+        user.setLastName(registerRequest.getLastName());
+        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        user.setRole(UserRole.USER);
+
+        userRepository.save(user);
+
+        AuthResponse authResponse = AuthResponse.builder()
+                .email(user.getEmail())
+                .role(user.getRole())
+                .build();
+
+        String token = jwtService.generateToken(authResponse);
+        authResponse.setToken(token);
+        return authResponse;
+    }
+
+    public AuthResponse login(LoginRequest loginRequest) {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getEmail(),
+                            loginRequest.getPassword()
+                    )
+            );
+        } catch (AuthenticationException e) {
+            throw new BadCredentialsException("Invalid email or password");
+        }
+
+        UserEntity user = userRepository.findByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        AuthResponse authResponse = AuthResponse.builder()
+                .email(user.getEmail())
+                .role(user.getRole())
+                .build();
+
+        String token = jwtService.generateToken(authResponse);
+        authResponse.setToken(token);
+
+        return authResponse;
+    }
+}

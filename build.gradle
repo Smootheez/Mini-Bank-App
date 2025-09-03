@@ -1,0 +1,70 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.5.5'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'dev.smootheez'
+version = '0.0.1-SNAPSHOT'
+description = 'A mini bank backend system using Java, PostgreSQL, Docker, Rest API'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+    // === JWT Authentication & Token Handling ===
+    implementation 'io.jsonwebtoken:jjwt-api:0.13.0'          // JWT API for creating/parsing tokens
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.13.0'             // JWT core implementation
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.13.0'          // JSON serialization/deserialization for JWT (via Jackson)
+
+    // === Logging ===
+    implementation 'ch.qos.logback:logback-classic'            // Logging backend for SLF4J (production-ready logging)
+
+    // === Spring Boot Starters ===
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'   // Health checks, metrics, monitoring endpoints
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'  // JDBC support with Spring Data
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'   // JPA + Hibernate ORM integration
+    implementation 'org.springframework.boot:spring-boot-starter-security'   // Spring Security (authentication & authorization)
+    implementation 'org.springframework.boot:spring-boot-starter-validation' // Bean validation (JSR-380) with Hibernate Validator
+    implementation 'org.springframework.boot:spring-boot-starter-web'        // REST API & MVC web support
+
+    // === Database Migration ===
+    implementation 'org.flywaydb:flyway-core'                  // Database migration tool
+    implementation 'org.flywaydb:flyway-database-postgresql'   // Flyway support for PostgreSQL
+
+    // === Code Generation & Annotations ===
+    compileOnly 'org.projectlombok:lombok'                     // Reduce boilerplate with Lombok annotations
+    annotationProcessor 'org.projectlombok:lombok'             // Lombok annotation processing
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'  // Metadata for @ConfigurationProperties
+
+    // === Database Driver ===
+    runtimeOnly 'org.postgresql:postgresql'                    // PostgreSQL JDBC driver
+
+    // === Testing ===
+    testImplementation 'org.springframework.boot:spring-boot-starter-test' // Spring Boot test utilities (JUnit, AssertJ, etc.)
+    testImplementation 'org.springframework.security:spring-security-test' // Security-specific test helpers
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher' // JUnit platform launcher for running tests
+}
+
+
+tasks.named('test', Test) {
+	useJUnitPlatform()
+}
+
+test {
+    jvmArgs "-javaagent:${configurations.testRuntimeClasspath.find { it.name.contains('mockito-core') }}"
+}
+
