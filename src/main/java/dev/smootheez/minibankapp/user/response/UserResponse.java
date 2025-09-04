@@ -1,6 +1,6 @@
 package dev.smootheez.minibankapp.user.response;
 
-import dev.smootheez.minibankapp.common.banking.*;
+import dev.smootheez.minibankapp.banking.*;
 import dev.smootheez.minibankapp.common.enums.*;
 import lombok.*;
 

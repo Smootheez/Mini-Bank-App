@@ -1,6 +1,6 @@
 package dev.smootheez.minibankapp.user.request;
 
-import dev.smootheez.minibankapp.common.banking.*;
+import dev.smootheez.minibankapp.banking.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 

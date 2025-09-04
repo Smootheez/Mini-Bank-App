@@ -9,6 +9,7 @@ import lombok.*;
 import lombok.extern.slf4j.*;
 import org.springframework.security.crypto.password.*;
 import org.springframework.stereotype.*;
+import org.springframework.transaction.annotation.*;
 
 @Slf4j
 @Service
@@ -24,6 +25,7 @@ public class UserService {
         return mappedToUserResponse(user);
     }
 
+    @Transactional
     public UserResponse updateUser(String email, UserUpdateRequest request) {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));

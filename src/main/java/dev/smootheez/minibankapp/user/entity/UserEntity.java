@@ -1,15 +1,19 @@
 package dev.smootheez.minibankapp.user.entity;
 
-import dev.smootheez.minibankapp.common.banking.*;
+import dev.smootheez.minibankapp.banking.*;
+import dev.smootheez.minibankapp.banking.transaction.entity.*;
 import dev.smootheez.minibankapp.common.entity.*;
+import dev.smootheez.minibankapp.common.enums.*;
 import dev.smootheez.minibankapp.user.*;
 import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.*;
 import org.hibernate.annotations.*;
 
 import java.math.*;
+import java.util.*;
 
 @Getter
 @Setter
@@ -44,6 +48,18 @@ public class UserEntity extends AbstractEntity {
     private SupportedCurrency currency;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private Status status;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private UserRole role;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TransactionEntity> transactions = new ArrayList<>();
+
+    @PrePersist
+    public void prePersist() {
+        this.status = Status.ACTIVE;
+    }
 }

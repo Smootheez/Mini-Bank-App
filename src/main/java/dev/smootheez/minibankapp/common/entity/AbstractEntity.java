@@ -1,6 +1,5 @@
 package dev.smootheez.minibankapp.common.entity;
 
-import dev.smootheez.minibankapp.common.enums.*;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.*;
@@ -27,17 +26,8 @@ public abstract class AbstractEntity {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private Status status;
-
     @PreUpdate
     public void preUpdate() {
         this.updatedAt = Instant.now();
-    }
-
-    @PrePersist
-    public void prePersist() {
-        this.status = Status.ACTIVE;
     }
 }

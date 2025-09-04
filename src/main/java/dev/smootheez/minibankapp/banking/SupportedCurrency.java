@@ -1,4 +1,4 @@
-package dev.smootheez.minibankapp.common.banking;
+package dev.smootheez.minibankapp.banking;
 
 import lombok.*;
 
