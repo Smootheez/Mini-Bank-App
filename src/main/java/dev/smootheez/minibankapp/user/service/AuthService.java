@@ -25,17 +25,18 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
-    public AuthResponse register(RegisterRequest registerRequest) {
-        String email = registerRequest.getEmail();
+    public AuthResponse register(UserRegisterRequest userRegisterRequest) {
+        String email = userRegisterRequest.getEmail();
         if (userRepository.existsByEmail(email))
             throw new UserAlreadyExistException("User with email " + email + " already exists");
 
         UserEntity user = new UserEntity();
         user.setEmail(email);
         user.setBalance(new BigDecimal(0));
-        user.setFirstName(registerRequest.getFirstName());
-        user.setLastName(registerRequest.getLastName());
-        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        user.setCurrency(userRegisterRequest.getCurrency());
+        user.setFirstName(userRegisterRequest.getFirstName());
+        user.setLastName(userRegisterRequest.getLastName());
+        user.setPassword(passwordEncoder.encode(userRegisterRequest.getPassword()));
         user.setRole(UserRole.USER);
 
         userRepository.save(user);
@@ -52,19 +53,19 @@ public class AuthService {
         return authResponse;
     }
 
-    public AuthResponse login(LoginRequest loginRequest) {
+    public AuthResponse login(UserLoginRequest userLoginRequest) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            loginRequest.getEmail(),
-                            loginRequest.getPassword()
+                            userLoginRequest.getEmail(),
+                            userLoginRequest.getPassword()
                     )
             );
         } catch (AuthenticationException e) {
             throw new BadCredentialsException("Invalid email or password");
         }
 
-        UserEntity user = userRepository.findByEmail(loginRequest.getEmail())
+        UserEntity user = userRepository.findByEmail(userLoginRequest.getEmail())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         AuthResponse authResponse = AuthResponse.builder()

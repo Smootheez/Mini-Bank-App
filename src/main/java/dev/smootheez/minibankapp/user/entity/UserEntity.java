@@ -1,5 +1,6 @@
 package dev.smootheez.minibankapp.user.entity;
 
+import dev.smootheez.minibankapp.common.banking.*;
 import dev.smootheez.minibankapp.common.entity.*;
 import dev.smootheez.minibankapp.user.*;
 import jakarta.persistence.*;
@@ -19,7 +20,7 @@ import java.math.*;
         @Index(name = "idx_user_email", columnList = "email")
 })
 public class UserEntity extends AbstractEntity {
-    @NaturalId
+    @NaturalId(mutable = true)
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
@@ -34,6 +35,10 @@ public class UserEntity extends AbstractEntity {
 
     @Column(name = "balance", nullable = false)
     private BigDecimal balance;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "currency", nullable = false)
+    private SupportedCurrency currency;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
