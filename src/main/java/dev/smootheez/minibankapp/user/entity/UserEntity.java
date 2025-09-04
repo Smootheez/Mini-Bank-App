@@ -1,5 +1,6 @@
 package dev.smootheez.minibankapp.user.entity;
 
+import dev.smootheez.minibankapp.common.entity.*;
 import dev.smootheez.minibankapp.user.*;
 import jakarta.persistence.*;
 import jakarta.persistence.Index;
@@ -17,12 +18,7 @@ import java.math.*;
 @Table(name = "users", indexes = {
         @Index(name = "idx_user_email", columnList = "email")
 })
-public class UserEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Long id;
-
+public class UserEntity extends AbstractEntity {
     @NaturalId
     @Column(name = "email", nullable = false, unique = true)
     private String email;

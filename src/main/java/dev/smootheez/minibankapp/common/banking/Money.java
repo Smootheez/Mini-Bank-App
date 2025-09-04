@@ -1,4 +1,4 @@
-package dev.smootheez.minibankapp.common;
+package dev.smootheez.minibankapp.common.banking;
 
 import java.math.*;
 import java.util.*;

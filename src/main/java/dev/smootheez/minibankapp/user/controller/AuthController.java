@@ -9,7 +9,6 @@ import lombok.extern.slf4j.*;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -18,7 +17,6 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
-        log.info("Registering user: {}", registerRequest.getEmail());
         return ResponseEntity.ok(authService.register(registerRequest));
     }
 
