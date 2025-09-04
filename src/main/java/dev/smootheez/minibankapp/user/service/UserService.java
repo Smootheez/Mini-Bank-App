@@ -28,44 +28,73 @@ public class UserService {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        if (isNonEmpty(request.getFirstName())) {
-            if (request.getFirstName().equals(user.getFirstName())) {
-                throw new SameValueException("First name is the same as the current value.");
-            }
-            user.setFirstName(request.getFirstName());
-        }
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword()))
+            throw new WrongCredentialException("Wrong password");
 
-        if (isNonEmpty(request.getLastName())) {
-            if (request.getLastName().equals(user.getLastName())) {
-                throw new SameValueException("Last name is the same as the current value.");
-            }
-            user.setLastName(request.getLastName());
-        }
+        checkToUpdateFirstName(request, user);
+        checkToUpdateLastName(request, user);
+        checkToUpdateEmail(request, user);
+        checkToUpdatePassword(request, user);
+        checkToUpdateCurrency(request, user);
+        checkToUpdatePin(request, user);
 
-        if (isNonEmpty(request.getEmail())) {
-            if (request.getEmail().equals(user.getEmail())) {
-                throw new SameValueException("Email is the same as the current value.");
-            }
-            user.setEmail(request.getEmail()); // ⚠️ Only if email is allowed to be updated
-        }
+        userRepository.save(user);
 
-        if (isNonEmpty(request.getPassword())) {
-            if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-                throw new SameValueException("Password is the same as the current value.");
-            }
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
-        }
+        return mappedToUserResponse(user);
+    }
 
+    private void checkToUpdatePin(UserUpdateRequest request, UserEntity user) {
+        if (isNonEmpty(request.getPin())) {
+            if (passwordEncoder.matches(request.getPin(), user.getPin())) {
+                throw new SameValueException("Pin is the same as the current value.");
+            }
+            user.setPin(passwordEncoder.encode(request.getPin()));
+        }
+    }
+
+    private static void checkToUpdateCurrency(UserUpdateRequest request, UserEntity user) {
         if (request.getCurrency() != null) {
             if (request.getCurrency().equals(user.getCurrency())) {
                 throw new SameValueException("Currency is the same as the current value.");
             }
             user.setCurrency(request.getCurrency());
         }
+    }
 
-        userRepository.save(user);
+    private void checkToUpdatePassword(UserUpdateRequest request, UserEntity user) {
+        if (isNonEmpty(request.getNewPassword())) {
+            if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+                throw new SameValueException("Password is the same as the current value.");
+            }
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+    }
 
-        return mappedToUserResponse(user);
+    private static void checkToUpdateEmail(UserUpdateRequest request, UserEntity user) {
+        if (isNonEmpty(request.getEmail())) {
+            if (request.getEmail().equals(user.getEmail())) {
+                throw new SameValueException("Email is the same as the current value.");
+            }
+            user.setEmail(request.getEmail()); // ⚠️ Only if email is allowed to be updated
+        }
+    }
+
+    private static void checkToUpdateLastName(UserUpdateRequest request, UserEntity user) {
+        if (isNonEmpty(request.getLastName())) {
+            if (request.getLastName().equals(user.getLastName())) {
+                throw new SameValueException("Last name is the same as the current value.");
+            }
+            user.setLastName(request.getLastName());
+        }
+    }
+
+    private static void checkToUpdateFirstName(UserUpdateRequest request, UserEntity user) {
+        if (isNonEmpty(request.getFirstName())) {
+            if (request.getFirstName().equals(user.getFirstName())) {
+                throw new SameValueException("First name is the same as the current value.");
+            }
+            user.setFirstName(request.getFirstName());
+        }
     }
 
     private static boolean isNonEmpty(String value) {

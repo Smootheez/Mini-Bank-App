@@ -33,6 +33,9 @@ public class UserEntity extends AbstractEntity {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Column(name = "pin", nullable = false)
+    private String pin;
+
     @Column(name = "balance", nullable = false)
     private BigDecimal balance;
 
