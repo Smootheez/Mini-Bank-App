@@ -12,6 +12,7 @@ import java.math.*;
 @AllArgsConstructor
 public class TransferRequest {
     @NotNull(message = "Receiver email is required, it can't be null")
+    @Email(message = "Invalid email format")
     @NotBlank(message = "Receiver email is required, it can't be blank")
     private String receiverEmail;
 

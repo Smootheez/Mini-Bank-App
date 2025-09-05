@@ -23,6 +23,7 @@ public class TransactionService {
     private final UserRepository userRepository;
     private final DepositRepository depositRepository;
     private final WithdrawRepository withdrawRepository;
+    private final TransferRepository transferRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -86,6 +87,49 @@ public class TransactionService {
                 .amount(withdraw.getAmount())
                 .withdrawDate(withdraw.getWithdrawDate())
                 .currency(withdraw.getCurrency())
+                .build();
+    }
+
+    @Transactional
+    public TransferResponse transfer(String email, TransferRequest transferRequest) {
+        UserEntity senderUser = userRepository.findByEmail(email).orElseThrow(
+                () -> new UserNotFoundException("User not found"));
+
+        if (!passwordEncoder.matches(transferRequest.getPin(), senderUser.getPin()))
+            throw new WrongCredentialException("Wrong pin");
+
+        UserEntity receiverUser = userRepository.findByEmail(transferRequest.getReceiverEmail()).orElseThrow(
+                () -> new UserNotFoundException("User not found"));
+
+        Money senderUserBalance = new Money(senderUser.getBalance(), senderUser.getCurrency());
+        Money receiverUserBalance = new Money(receiverUser.getBalance(), receiverUser.getCurrency());
+        Money transferBalance = new Money(transferRequest.getAmount(), transferRequest.getCurrency());
+
+        BalanceCalculator.TransferResult totalSenderUserBalance = BalanceCalculator.transfer(senderUserBalance, receiverUserBalance, transferBalance);
+
+        senderUser.setBalance(totalSenderUserBalance.fromBalance().amount());
+        receiverUser.setBalance(totalSenderUserBalance.toBalance().amount());
+
+        userRepository.save(senderUser);
+        userRepository.save(receiverUser);
+
+        TransferEntity transfer = new TransferEntity();
+        transfer.setTransferId("TRF-" + UUID.randomUUID());
+        transfer.setAmount(transferRequest.getAmount());
+        transfer.setCurrency(transferRequest.getCurrency());
+        transfer.setUser(senderUser);
+        transfer.setReceiverEmail(receiverUser.getEmail());
+        transfer.setReceiverName(receiverUser.getFirstName() + " " + receiverUser.getLastName());
+
+        transferRepository.save(transfer);
+
+        return TransferResponse.builder()
+                .transferId(transfer.getTransferId())
+                .amount(transfer.getAmount())
+                .currency(transfer.getCurrency())
+                .receiverEmail(transfer.getReceiverEmail())
+                .receiverName(transfer.getReceiverName())
+                .transactionDate(transfer.getTransferDate())
                 .build();
     }
 }

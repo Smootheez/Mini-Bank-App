@@ -1,5 +1,6 @@
 package dev.smootheez.minibankapp.banking.transaction.entity;
 
+import dev.smootheez.minibankapp.banking.*;
 import dev.smootheez.minibankapp.common.entity.*;
 import dev.smootheez.minibankapp.user.entity.*;
 import jakarta.persistence.*;
@@ -27,13 +28,7 @@ public class TransferEntity extends AbstractEntity {
     private BigDecimal amount;
 
     @Column(name = "currency", nullable = false)
-    private String currency;
-
-    @Column(name = "sender_email", nullable = false)
-    private String senderEmail;
-
-    @Column(name = "sender_name", nullable = false)
-    private String senderName;
+    private SupportedCurrency currency;
 
     @Column(name = "receiver_email", nullable = false)
     private String receiverEmail;
@@ -41,11 +36,11 @@ public class TransferEntity extends AbstractEntity {
     @Column(name = "receiver_name", nullable = false)
     private String receiverName;
 
+    @CreationTimestamp
     @Column(name = "transaction_date", nullable = false, updatable = false)
     private Instant transferDate;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "email", referencedColumnName = "email")
     private UserEntity user;
-
 }

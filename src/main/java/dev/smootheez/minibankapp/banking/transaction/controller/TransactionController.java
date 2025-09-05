@@ -29,4 +29,11 @@ public class TransactionController {
     {
         return ResponseEntity.ok(transactionService.withdraw(userDetails.getUsername(), withdrawRequest));
     }
+
+    @PostMapping("/transfer")
+    public ResponseEntity<TransferResponse> transfer(@AuthenticationPrincipal UserDetails userDetails,
+                                                   @Valid @RequestBody TransferRequest transferRequest)
+    {
+        return ResponseEntity.ok(transactionService.transfer(userDetails.getUsername(), transferRequest));
+    }
 }

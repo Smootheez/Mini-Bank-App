@@ -11,9 +11,7 @@ import java.time.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TransferResponse {
-    private String transactionId;
-    private String senderName;
-    private String senderEmail;
+    private String transferId;
     private String receiverName;
     private String receiverEmail;
     private BigDecimal amount;
