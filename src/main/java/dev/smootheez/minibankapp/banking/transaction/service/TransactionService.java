@@ -98,6 +98,9 @@ public class TransactionService {
         if (!passwordEncoder.matches(transferRequest.getPin(), senderUser.getPin()))
             throw new WrongCredentialException("Wrong pin");
 
+        if (email.equals(transferRequest.getReceiverEmail()))
+            throw new IllegalArgumentException("Sender and receiver cannot be the same");
+
         UserEntity receiverUser = userRepository.findByEmail(transferRequest.getReceiverEmail()).orElseThrow(
                 () -> new UserNotFoundException("User not found"));
 
