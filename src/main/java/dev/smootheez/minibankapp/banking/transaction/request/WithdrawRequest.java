@@ -10,16 +10,16 @@ import java.math.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DepositRequest {
-    @NotNull(message = "Amount is required, it can't be null")
-    @Min(value = 0, message = "Amount must be greater than or equal to 0")
+public class WithdrawRequest {
+    @NotNull(message = "Amount cannot be null")
+    @Min(value = 1, message = "Amount must be greater than 0")
     private BigDecimal amount;
 
-    @NotNull(message = "Currency is required, it can't be null")
+    @NotNull(message = "Currency cannot be null")
     private SupportedCurrency currency;
 
-    @NotNull(message = "Pin is required, it can't be null")
-    @NotBlank(message = "Pin is required, it can't be blank")
+    @NotNull(message = "Pin cannot be null")
+    @NotBlank(message = "Pin cannot be blank")
     @Pattern(regexp = "^\\d{6}$", message = "Pin must be 6 digits long")
     private String pin;
 }

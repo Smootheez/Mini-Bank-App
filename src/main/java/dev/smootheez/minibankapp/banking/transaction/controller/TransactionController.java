@@ -22,4 +22,11 @@ public class TransactionController {
     {
         return ResponseEntity.ok(transactionService.deposit(userDetails.getUsername(), depositRequest));
     }
+
+    @PostMapping("/withdraw")
+    public ResponseEntity<WithdrawResponse> withdraw(@AuthenticationPrincipal UserDetails userDetails,
+                                                   @Valid @RequestBody WithdrawRequest withdrawRequest)
+    {
+        return ResponseEntity.ok(transactionService.withdraw(userDetails.getUsername(), withdrawRequest));
+    }
 }

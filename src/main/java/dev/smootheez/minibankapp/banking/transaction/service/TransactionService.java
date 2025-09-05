@@ -22,6 +22,7 @@ import java.util.*;
 public class TransactionService {
     private final UserRepository userRepository;
     private final DepositRepository depositRepository;
+    private final WithdrawRepository withdrawRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -53,6 +54,38 @@ public class TransactionService {
                 .amount(deposit.getAmount())
                 .depositDate(deposit.getDepositDate())
                 .currency(deposit.getCurrency())
+                .build();
+    }
+
+    @Transactional
+    public WithdrawResponse withdraw(String email, WithdrawRequest withdrawRequest) {
+        UserEntity user = userRepository.findByEmail(email).orElseThrow(
+                () -> new UserNotFoundException("User not found"));
+
+        if (!passwordEncoder.matches(withdrawRequest.getPin(), user.getPin()))
+            throw new WrongCredentialException("Wrong pin");
+
+        Money userBalance = new Money(user.getBalance(), user.getCurrency());
+        Money withdrawBalance = new Money(withdrawRequest.getAmount(), withdrawRequest.getCurrency());
+
+        Money totalBalance = BalanceCalculator.withdraw(userBalance, withdrawBalance);
+        user.setBalance(totalBalance.amount());
+
+        userRepository.save(user);
+
+        WithdrawEntity withdraw = new WithdrawEntity();
+        withdraw.setWithdrawId("WDR-" + UUID.randomUUID());
+        withdraw.setAmount(withdrawRequest.getAmount());
+        withdraw.setCurrency(withdrawRequest.getCurrency());
+        withdraw.setUser(user);
+
+        withdrawRepository.save(withdraw);
+
+        return WithdrawResponse.builder()
+                .withdrawId(withdraw.getWithdrawId())
+                .amount(withdraw.getAmount())
+                .withdrawDate(withdraw.getWithdrawDate())
+                .currency(withdraw.getCurrency())
                 .build();
     }
 }

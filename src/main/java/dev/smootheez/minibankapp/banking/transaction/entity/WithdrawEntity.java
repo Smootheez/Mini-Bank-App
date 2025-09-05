@@ -16,24 +16,24 @@ import java.time.*;
 @Getter
 @Setter
 @Entity
-@Table(name = "deposits", indexes = {
-        @Index(name = "idx_deposits", columnList = "deposit_id")
+@Table(name = "withdraws", indexes = {
+        @Index(name = "idx_withdraws", columnList = "withdraw_id")
 })
-public class DepositEntity extends AbstractEntity {
+public class WithdrawEntity extends AbstractEntity {
     @NaturalId
-    @Column(name = "deposit_id", nullable = false, unique = true)
-    private String depositId;
+    @Column(name = "withdraw_id", nullable = false, unique = true)
+    private String withdrawId;
 
     @Column(name = "amount", nullable = false)
     private BigDecimal amount;
 
-    @CreationTimestamp
-    @Column(name = "deposit_date", nullable = false, updatable = false)
-    private Instant depositDate;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "currency", nullable = false)
     private SupportedCurrency currency;
+
+    @CreationTimestamp
+    @Column(name = "withdraw_date", nullable = false, updatable = false)
+    private Instant withdrawDate;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "email", referencedColumnName = "email", nullable = false)
