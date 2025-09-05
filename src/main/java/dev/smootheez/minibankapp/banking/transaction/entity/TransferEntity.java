@@ -1,6 +1,5 @@
 package dev.smootheez.minibankapp.banking.transaction.entity;
 
-import dev.smootheez.minibankapp.banking.transaction.*;
 import dev.smootheez.minibankapp.common.entity.*;
 import dev.smootheez.minibankapp.user.entity.*;
 import jakarta.persistence.*;
@@ -16,13 +15,13 @@ import java.time.*;
 @Getter
 @Setter
 @Entity
-@Table(name = "transactions", indexes = {
-        @Index(name = "idx_transaction", columnList = "transaction_id")
+@Table(name = "transfers", indexes = {
+        @Index(name = "idx_transfers", columnList = "transfer_id")
 })
-public class TransactionEntity extends AbstractEntity {
+public class TransferEntity extends AbstractEntity {
     @NaturalId
-    @Column(name = "transaction_id", nullable = false, unique = true)
-    private String transactionId;
+    @Column(name = "transfer_id", nullable = false, unique = true)
+    private String transferId;
 
     @Column(name = "amount", nullable = false)
     private BigDecimal amount;
@@ -43,11 +42,7 @@ public class TransactionEntity extends AbstractEntity {
     private String receiverName;
 
     @Column(name = "transaction_date", nullable = false, updatable = false)
-    private Instant transactionDate;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "transaction_type", nullable = false)
-    private TransactionType transactionType;
+    private Instant transferDate;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "email", referencedColumnName = "email")

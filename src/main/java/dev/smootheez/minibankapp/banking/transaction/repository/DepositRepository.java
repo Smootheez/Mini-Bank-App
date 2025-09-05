@@ -7,7 +7,7 @@ import org.springframework.stereotype.*;
 import java.util.*;
 
 @Repository
-public interface TransactionRepository extends JpaRepository<TransactionEntity, Long> {
-    Optional<TransactionEntity> findByTransactionId(String transactionId);
-    boolean existsByTransactionId(String transactionId);
+public interface DepositRepository extends JpaRepository<DepositEntity, Long> {
+    Optional<DepositEntity> findByDepositId(String depositId);
+    boolean existsByDepositId(String depositId);
 }

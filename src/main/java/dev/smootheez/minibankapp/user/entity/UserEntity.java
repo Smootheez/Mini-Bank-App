@@ -56,7 +56,10 @@ public class UserEntity extends AbstractEntity {
     private UserRole role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TransactionEntity> transactions = new ArrayList<>();
+    private List<TransferEntity> transactions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DepositEntity> deposits = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {
