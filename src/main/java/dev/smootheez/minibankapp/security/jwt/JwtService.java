@@ -1,8 +1,9 @@
 package dev.smootheez.minibankapp.security.jwt;
 
-import dev.smootheez.minibankapp.user.model.UserEntity;
+import dev.smootheez.minibankapp.user.model.*;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.*;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.*;
 
@@ -12,11 +13,12 @@ import java.util.function.*;
 
 @Service
 public class JwtService {
-    private static final String SECRET_KEY = "your-256-bit-secret-your-256-bit-secret"; // replace with env var
+    @Value("${jwt.secret.key}")
+    private String secretKey;
     private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 10L; // 10 hours
 
     private SecretKey getSecretKey() {
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+        return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
     public String extractEmail(String token) {
