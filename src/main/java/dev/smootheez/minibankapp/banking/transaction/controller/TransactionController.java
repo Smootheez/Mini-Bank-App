@@ -1,39 +1,44 @@
 package dev.smootheez.minibankapp.banking.transaction.controller;
 
-import dev.smootheez.minibankapp.banking.transaction.request.*;
-import dev.smootheez.minibankapp.banking.transaction.response.*;
+import dev.smootheez.minibankapp.banking.transaction.http.request.*;
+import dev.smootheez.minibankapp.banking.transaction.http.response.*;
 import dev.smootheez.minibankapp.banking.transaction.service.*;
 import jakarta.validation.*;
 import lombok.*;
+import lombok.extern.slf4j.*;
 import org.springframework.http.*;
 import org.springframework.security.core.annotation.*;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
-@RequestMapping("/api/v1/transaction")
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/transactions")
 public class TransactionController {
     private final TransactionService transactionService;
 
     @PostMapping("/deposit")
-    public ResponseEntity<DepositResponse> deposit(@AuthenticationPrincipal UserDetails userDetails,
-                                                   @Valid @RequestBody DepositRequest depositRequest)
+    public ResponseEntity<TransactionInfoResponse> deposit(@AuthenticationPrincipal UserDetails userDetails,
+                                                           @Valid @RequestBody DepositRequest request)
     {
-        return ResponseEntity.ok(transactionService.deposit(userDetails.getUsername(), depositRequest));
+        log.info("Receiving deposit request");
+        return ResponseEntity.ok(transactionService.deposit(userDetails.getUsername(), request));
     }
 
     @PostMapping("/withdraw")
-    public ResponseEntity<WithdrawResponse> withdraw(@AuthenticationPrincipal UserDetails userDetails,
-                                                   @Valid @RequestBody WithdrawRequest withdrawRequest)
+    public ResponseEntity<TransactionInfoResponse> withdraw(@AuthenticationPrincipal UserDetails userDetails,
+                                                             @Valid @RequestBody WithdrawRequest request)
     {
-        return ResponseEntity.ok(transactionService.withdraw(userDetails.getUsername(), withdrawRequest));
+        log.info("Receiving withdraw request");
+        return ResponseEntity.ok(transactionService.withdraw(userDetails.getUsername(), request));
     }
 
     @PostMapping("/transfer")
-    public ResponseEntity<TransferResponse> transfer(@AuthenticationPrincipal UserDetails userDetails,
-                                                   @Valid @RequestBody TransferRequest transferRequest)
+    public ResponseEntity<TransactionInfoResponse> transfer(@AuthenticationPrincipal UserDetails userDetails,
+                                                             @Valid @RequestBody TransferRequest request)
     {
-        return ResponseEntity.ok(transactionService.transfer(userDetails.getUsername(), transferRequest));
+        log.info("Receiving transfer request");
+        return ResponseEntity.ok(transactionService.transfer(userDetails.getUsername(), request));
     }
 }

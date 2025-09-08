@@ -1,9 +1,0 @@
-package dev.smootheez.minibankapp.banking.transaction.repository;
-
-import dev.smootheez.minibankapp.banking.transaction.entity.*;
-import org.springframework.data.jpa.repository.*;
-import org.springframework.stereotype.*;
-
-@Repository
-public interface TransferRepository extends JpaRepository<TransferEntity, Long> {
-}

@@ -1,10 +1,10 @@
 package dev.smootheez.minibankapp.user.service;
 
-import dev.smootheez.minibankapp.user.entity.*;
-import dev.smootheez.minibankapp.user.exception.*;
+import dev.smootheez.minibankapp.core.exception.*;
+import dev.smootheez.minibankapp.user.http.request.*;
+import dev.smootheez.minibankapp.user.http.response.*;
+import dev.smootheez.minibankapp.user.model.*;
 import dev.smootheez.minibankapp.user.repository.*;
-import dev.smootheez.minibankapp.user.request.*;
-import dev.smootheez.minibankapp.user.response.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
 import org.springframework.security.crypto.password.*;
@@ -18,101 +18,111 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserResponse getUserInfo(String email) {
-        UserEntity user = userRepository.findByEmail(email).orElseThrow(
-                () -> new UserNotFoundException("User not found"));
-
-        return mappedToUserResponse(user);
-    }
-
+    /**
+     * === User delete ===
+     * @param email User's email
+     */
     @Transactional
-    public UserResponse updateUser(String email, UserUpdateRequest request) {
-        UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+    public void delete(String email, UserDeleteRequest request) {
+        UserEntity user = loadUserByEmail(email);
 
+        // Password check (authentication)
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword()))
-            throw new WrongCredentialException("Wrong password");
+            throw new InvalidCredentialsException("Invalid credentials");
 
-        checkToUpdateFirstName(request, user);
-        checkToUpdateLastName(request, user);
-        checkToUpdateEmail(request, user);
-        checkToUpdatePassword(request, user);
-        checkToUpdateCurrency(request, user);
-        checkToUpdatePin(request, user);
+        // Email check (authorization)
+        if (!user.getEmail().equals(request.getEmail()))
+            throw new IllegalArgumentException("Email does not match");
 
-        userRepository.save(user);
-
-        return mappedToUserResponse(user);
+        userRepository.delete(user); // Delete user from the database
+        log.info("Successfully deleted user");
     }
 
-    private void checkToUpdatePin(UserUpdateRequest request, UserEntity user) {
-        if (isNonEmpty(request.getPin())) {
-            if (passwordEncoder.matches(request.getPin(), user.getPin())) {
-                throw new SameValueException("Pin is the same as the current value.");
-            }
-            user.setPin(passwordEncoder.encode(request.getPin()));
+    private UserEntity loadUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+    }
+
+    /**
+     * === User info ===
+     * @param email User's email
+     */
+    @Transactional(readOnly = true)
+    public UserInfoResponse info(String email) {
+        log.info("Successfully received user info request");
+        return userRepository.getUserInfo(email); // Get user info from the database
+    }
+
+    /**
+     * Update a user's info'
+     * @param email User's email
+     * @param request User's update request {@link UserUpdateRequest}
+     */
+    @Transactional
+    public UserInfoResponse update(String email, UserUpdateRequest request) {
+        UserEntity user = loadUserByEmail(email);
+
+        // Password check (authentication)
+        validatePassword(request, user);
+
+        // === Only update values if they are changed ===
+        updateFirstName(request, user); // Update a user's first name'
+        updateLastName(request, user); // Update a user's last name'
+        updateEmail(request, user); // Update a user's email'
+        updatePin(request, user); // Update a user's PIN'
+        updatePassword(request, user); // Update a user's password'
+
+        userRepository.save(user); // Save changes to the database
+        log.info("Successfully updated user info request");
+        return userRepository.getUserInfo(user.getEmail());
+    }
+
+    private void updatePassword(UserUpdateRequest request, UserEntity user) {
+        String newPassword = request.getPassword();
+        if (newPassword != null && !newPassword.isBlank()
+                && !passwordEncoder.matches(newPassword, user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(newPassword)); // Change a user's password
         }
     }
 
-    private static void checkToUpdateCurrency(UserUpdateRequest request, UserEntity user) {
-        if (request.getCurrency() != null) {
-            if (request.getCurrency().equals(user.getCurrency())) {
-                throw new SameValueException("Currency is the same as the current value.");
-            }
-            user.setCurrency(request.getCurrency());
+    private void updatePin(UserUpdateRequest request, UserEntity user) {
+        String newPin = request.getNewPin();
+        if (newPin != null && !newPin.isBlank()
+                && !passwordEncoder.matches(newPin, user.getPin())) {
+            user.setPin(passwordEncoder.encode(newPin)); // Change user's PIN
         }
     }
 
-    private void checkToUpdatePassword(UserUpdateRequest request, UserEntity user) {
-        if (isNonEmpty(request.getNewPassword())) {
-            if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
-                throw new SameValueException("Password is the same as the current value.");
+    private void updateEmail(UserUpdateRequest request, UserEntity user) {
+        if (isValidAndChanged(request.getNewEmail(), user.getEmail())) {
+            if (userRepository.existsByEmail(request.getNewEmail())) { // Check if email already exists
+                throw new UserAlreadyExistException("User with the same email already exists"); // Email already exists exception
             }
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
+            user.setEmail(request.getNewEmail().trim()); // Change user's email
         }
     }
 
-    private static void checkToUpdateEmail(UserUpdateRequest request, UserEntity user) {
-        if (isNonEmpty(request.getEmail())) {
-            if (request.getEmail().equals(user.getEmail())) {
-                throw new SameValueException("Email is the same as the current value.");
-            }
-            user.setEmail(request.getEmail()); // ⚠️ Only if email is allowed to be updated
+    private static void updateLastName(UserUpdateRequest request, UserEntity user) {
+        if (isValidAndChanged(request.getNewLastName(), user.getLastName())) {
+            user.setLastName(request.getNewLastName().trim()); // Change a user's last name
         }
     }
 
-    private static void checkToUpdateLastName(UserUpdateRequest request, UserEntity user) {
-        if (isNonEmpty(request.getLastName())) {
-            if (request.getLastName().equals(user.getLastName())) {
-                throw new SameValueException("Last name is the same as the current value.");
-            }
-            user.setLastName(request.getLastName());
+    private static void updateFirstName(UserUpdateRequest request, UserEntity user) {
+        if (isValidAndChanged(request.getNewFirstName(), user.getFirstName())) {
+            user.setFirstName(request.getNewFirstName().trim()); // Change a user's first name
         }
     }
 
-    private static void checkToUpdateFirstName(UserUpdateRequest request, UserEntity user) {
-        if (isNonEmpty(request.getFirstName())) {
-            if (request.getFirstName().equals(user.getFirstName())) {
-                throw new SameValueException("First name is the same as the current value.");
-            }
-            user.setFirstName(request.getFirstName());
+    private void validatePassword(UserUpdateRequest request, UserEntity user) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new InvalidCredentialsException("Invalid password");
         }
     }
 
-    private static boolean isNonEmpty(String value) {
-        return value != null && !value.trim().isEmpty();
-    }
-
-
-    private static UserResponse mappedToUserResponse(UserEntity user) {
-        return UserResponse.builder()
-                .id(user.getId())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .email(user.getEmail())
-                .balance(user.getBalance())
-                .currency(user.getCurrency())
-                .status(user.getStatus())
-                .build();
+    private static boolean isValidAndChanged(String newValue, String currentValue) {
+        return newValue != null &&
+                !newValue.isBlank() &&
+                !newValue.equals(currentValue);
     }
 }

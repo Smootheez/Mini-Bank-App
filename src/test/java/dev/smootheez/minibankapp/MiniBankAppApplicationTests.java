@@ -10,4 +10,5 @@ class MiniBankAppApplicationTests {
 	void contextLoads() {
         // Empty test
 	}
+
 }
