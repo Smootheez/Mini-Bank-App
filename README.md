@@ -49,7 +49,7 @@ A simple RESTful API for a banking application built with Java and Spring Boot. 
 
     **Required Environment Variables:**
     -   `SPRING_PROFILE_ACTIVE`: Set the active Spring profile (e.g., `dev`, `prod`).
-    -   `DB_URL`: The full JDBC URL for your PostgreSQL database (e.g., `localhost:5432/minibank`).
+    -   `DB_URL`: The full JDBC URL for your PostgreSQL database (e.g., `localhost:5432/mini-bank`).
     -   `DB_USER`: The username for your database.
     -   `DB_PASSWORD`: The password for your database.
     -   `JWT_SECRET`: A secure secret key for signing JWTs.
@@ -103,7 +103,3 @@ The following are the primary API endpoints available:
 -   `POST /api/v1/transactions/deposit`: Deposit money into an account.
 -   `POST /api/v1/transactions/withdraw`: Withdraw money from an account.
 -   `POST /api/v1/transactions/transfer`: Transfer money between accounts.
-
----
-
-*This README.md was generated based on the project structure. You may need to update it with more specific details about your project's implementation.*
