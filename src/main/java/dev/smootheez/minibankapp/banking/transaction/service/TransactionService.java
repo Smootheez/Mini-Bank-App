@@ -21,109 +21,129 @@ import org.springframework.transaction.annotation.*;
 public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
-
     private final PasswordEncoder passwordEncoder;
 
+    // === Deposit ===
     @Transactional
     public TransactionInfoResponse deposit(String email, DepositRequest request) {
         UserEntity user = loadUserByEmail(email);
-
         validatePin(request.getPin(), user);
 
-        SupportedCurrency currency = user.getCurrency();
-        Money userBalance = new Money(user.getBalance(), currency);
-        Money depositAmount = new Money(request.getAmount(), currency);
-
-        Money newBalance = BalanceCalculator.deposite(depositAmount, userBalance);
+        Money depositAmount = new Money(request.getAmount(), user.getCurrency());
+        Money newBalance = BalanceCalculator.deposite(depositAmount, new Money(user.getBalance(), user.getCurrency()));
         user.setBalance(newBalance.amount());
 
-        TransactionEntity transaction = new TransactionEntity();
-        TransactionType transactionType = TransactionType.DEPOSIT;
-        transaction.setTransactionId(TransactionIdGenerator.generate(transactionType));
-        transaction.setAmount(depositAmount.amount());
-        transaction.setCurrency(currency);
-        transaction.setType(transactionType);
-        transaction.setUser(user);
+        TransactionEntity transaction = buildTransaction(user, TransactionType.DEPOSIT, depositAmount);
+        persistTransactionAndUsers(transaction, user);
 
-        transactionRepository.save(transaction);
-        userRepository.save(user);
-
-        log.info("Successfully deposited");
-        return transactionRepository.getTransactionInfo(transaction.getTransactionId());
+        logTransaction("Deposit", email, depositAmount);
+        return fetchTransactionInfo(transaction);
     }
 
+    // === Withdraw ===
     @Transactional
     public TransactionInfoResponse withdraw(String email, WithdrawRequest request) {
         UserEntity user = loadUserByEmail(email);
-
         validatePin(request.getPin(), user);
 
-        SupportedCurrency currency = user.getCurrency();
-        Money userBalance = new Money(user.getBalance(), currency);
-        Money withdrawAmount = new Money(request.getAmount(), currency);
-
-        Money newBalance = BalanceCalculator.withdraw(withdrawAmount, userBalance);
+        Money withdrawAmount = new Money(request.getAmount(), user.getCurrency());
+        Money newBalance = BalanceCalculator.withdraw(withdrawAmount, new Money(user.getBalance(), user.getCurrency()));
         user.setBalance(newBalance.amount());
 
-        TransactionEntity transaction = new TransactionEntity();
-        TransactionType transactionType = TransactionType.WITHDRAW;
-        transaction.setTransactionId(TransactionIdGenerator.generate(transactionType));
-        transaction.setAmount(withdrawAmount.amount());
-        transaction.setCurrency(currency);
-        transaction.setType(transactionType);
-        transaction.setUser(user);
+        TransactionEntity transaction = buildTransaction(user, TransactionType.WITHDRAW, withdrawAmount);
+        persistTransactionAndUsers(transaction, user);
 
-        transactionRepository.save(transaction);
-        userRepository.save(user);
-
-        log.info("Successfully withdrawn");
-        return transactionRepository.getTransactionInfo(transaction.getTransactionId());
+        logTransaction("Withdraw", email, withdrawAmount);
+        return fetchTransactionInfo(transaction);
     }
 
+    // === Transfer ===
     @Transactional
     public TransactionInfoResponse transfer(String email, TransferRequest request) {
-        UserEntity userSender = loadUserByEmail(email);
+        UserEntity sender = loadUserByEmail(email);
+        validatePin(request.getPin(), sender);
 
-        validatePin(request.getPin(), userSender);
+        UserEntity receiver = loadUserByEmail(request.getReceiverEmail());
 
-        UserEntity userReceiver = loadUserByEmail(request.getReceiverEmail());
+        Money transferAmount = new Money(request.getAmount(), sender.getCurrency());
 
-        SupportedCurrency senderCurrency = userSender.getCurrency();
-        Money senderBalance = new Money(userSender.getBalance(), senderCurrency);
-        Money receiverBalance = new Money(userReceiver.getBalance(), userReceiver.getCurrency());
-        Money transferAmount = new Money(request.getAmount(), senderCurrency);
+        BalanceCalculator.TransferResult result = BalanceCalculator.transfer(
+                transferAmount,
+                new Money(sender.getBalance(), sender.getCurrency()),
+                new Money(receiver.getBalance(), receiver.getCurrency())
+        );
 
-        BalanceCalculator.TransferResult transferResult = BalanceCalculator.transfer(transferAmount, senderBalance, receiverBalance);
+        sender.setBalance(result.fromBalance().amount());
+        receiver.setBalance(result.toBalance().amount());
 
-        userSender.setBalance(transferResult.fromBalance().amount());
-        userReceiver.setBalance(transferResult.toBalance().amount());
+        TransactionEntity transaction = buildTransaction(
+                sender,
+                TransactionType.TRANSFER,
+                transferAmount,
+                receiver.getEmail(),
+                receiver.getFirstName() + " " + receiver.getLastName()
+        );
 
-        TransactionEntity transaction = new TransactionEntity();
-        TransactionType transactionType = TransactionType.TRANSFER;
-        transaction.setTransactionId(TransactionIdGenerator.generate(transactionType));
-        transaction.setReceiverEmail(userReceiver.getEmail());
-        transaction.setReceiverName(userReceiver.getFirstName() + " " + userReceiver.getLastName());
-        transaction.setAmount(transferAmount.amount());
-        transaction.setCurrency(senderCurrency);
-        transaction.setType(transactionType);
-        transaction.setUser(userSender);
+        persistTransactionAndUsers(transaction, sender, receiver);
 
-        transactionRepository.save(transaction); // Save transaction to the database
-        userRepository.save(userSender); // Save user's sender balance to the database
-        userRepository.save(userReceiver); // Save the user's receiver balance to the database
-
-        log.info("Successfully transferred");
-        return transactionRepository.getTransactionInfo(transaction.getTransactionId());
+        logTransaction(email, transferAmount, receiver.getEmail());
+        return fetchTransactionInfo(transaction);
     }
 
+    // ───────────────────────────────────────────────
+    // Private Helpers
+    // ───────────────────────────────────────────────
+
     private UserEntity loadUserByEmail(String email) {
-        return userRepository.findByEmail(email).orElseThrow(
-                () -> new UserNotFoundException("User not found")
-        );
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + email));
     }
 
     private void validatePin(String rawPin, UserEntity user) {
-        if (!passwordEncoder.matches(rawPin, user.getPin()))
+        if (!passwordEncoder.matches(rawPin, user.getPin())) {
             throw new InvalidCredentialsException("Invalid PIN");
+        }
+    }
+
+    private TransactionEntity buildTransaction(UserEntity user, TransactionType type, Money amount) {
+        return buildTransaction(user, type, amount, null, null);
+    }
+
+    private TransactionEntity buildTransaction(UserEntity user, TransactionType type, Money amount,
+                                               String receiverEmail, String receiverName) {
+        TransactionEntity transaction = new TransactionEntity();
+        transaction.setTransactionId(TransactionIdGenerator.generate(type));
+        transaction.setAmount(amount.amount());
+        transaction.setCurrency(user.getCurrency());
+        transaction.setType(type);
+        transaction.setUser(user);
+
+        if (type == TransactionType.TRANSFER) {
+            transaction.setReceiverEmail(receiverEmail);
+            transaction.setReceiverName(receiverName);
+        }
+
+        return transaction;
+    }
+
+    private void persistTransactionAndUsers(TransactionEntity transaction, UserEntity... users) {
+        transactionRepository.save(transaction);
+        for (UserEntity user : users) {
+            userRepository.save(user);
+        }
+        transactionRepository.flush(); // Ensure the transaction is persisted before fetching
+    }
+
+    private TransactionInfoResponse fetchTransactionInfo(TransactionEntity transaction) {
+        return transactionRepository.getTransactionInfo(transaction.getTransactionId());
+    }
+
+    private void logTransaction(String action, String senderEmail, Money amount) {
+        log.info("{} successful for user {}: {} {}", action, senderEmail, amount.amount(), amount.currency());
+    }
+
+    private void logTransaction(String senderEmail, Money amount, String receiverEmail) {
+        log.info("{} successful from {} to {}: {} {}", "Transfer", senderEmail, receiverEmail, amount.amount(), amount.currency());
     }
 }
+
