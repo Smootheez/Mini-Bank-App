@@ -29,7 +29,7 @@ public class ApiResponseEntity<T> extends ResponseEntity<ApiResponse<T>> {
     }
 
     // ✅ 3. Multiple messages
-    public static <T> ApiResponseEntity<T> build(HttpStatusCode status, List<String> messages) {
+    public static <T> ApiResponseEntity<T> build(HttpStatusCode status, String[] messages) {
         return new ApiResponseEntity<>(
                 ApiResponse.build(status.value(), null, messages, Instant.now(), null),
                 status
@@ -37,7 +37,7 @@ public class ApiResponseEntity<T> extends ResponseEntity<ApiResponse<T>> {
     }
 
     // ✅ Optional: multiple messages with data
-    public static <T> ApiResponseEntity<T> build(HttpStatusCode status, List<String> messages, T body) {
+    public static <T> ApiResponseEntity<T> build(HttpStatusCode status, String[] messages, T body) {
         return new ApiResponseEntity<>(
                 ApiResponse.build(status.value(), null, messages, Instant.now(), body),
                 status
@@ -45,16 +45,39 @@ public class ApiResponseEntity<T> extends ResponseEntity<ApiResponse<T>> {
     }
 }
 
-// ✅ Fixed record with List<String> messages instead of a single String
+// ✅ Fixed record with multiple messages instead of a single String
 @JsonInclude(JsonInclude.Include.NON_NULL) // <-- only include non-null fields in JSON
 record ApiResponse<T>(
         Integer status,
         String message,        // shown when single message
-        List<String> messages, // shown when multiple
+        String[] messages, // shown when multiple
         Instant timestamp,
         T data
 ) {
-    public static <T> ApiResponse<T> build(int status, String message, List<String> messages, Instant timestamp, T data) {
+    public static <T> ApiResponse<T> build(int status, String message, String[] messages, Instant timestamp, T data) {
         return new ApiResponse<>(status, message, messages, timestamp, data);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        ApiResponse<?> that = (ApiResponse<?>) o;
+        return Objects.equals(data, that.data) && Objects.equals(status, that.status) && Objects.equals(message, that.message) && Objects.deepEquals(messages, that.messages) && Objects.equals(timestamp, that.timestamp);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(status, message, Arrays.hashCode(messages), timestamp, data);
+    }
+
+    @Override
+    public String toString() {
+        return "ApiResponse{" +
+                "status=" + status +
+                ", message='" + message + '\'' +
+                ", messages=" + Arrays.toString(messages) +
+                ", timestamp=" + timestamp +
+                ", data=" + data +
+                '}';
     }
 }
