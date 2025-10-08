@@ -2,6 +2,7 @@ package dev.smootheez.minibankapp.domain.model;
 
 import dev.smootheez.minibankapp.domain.enums.*;
 import jakarta.persistence.*;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.*;
 import org.hibernate.annotations.*;
@@ -11,7 +12,9 @@ import java.math.*;
 @Getter
 @Setter
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+        @Index(name = "idx_users", columnList = "email")
+})
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,6 +47,10 @@ public class UserEntity {
 
     @Column(name = "balance", nullable = false)
     private BigDecimal balance;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20, name = "currency", nullable = false)
+    private SupportedCurrency currency;
 
     @PrePersist
     public void prePersist() {

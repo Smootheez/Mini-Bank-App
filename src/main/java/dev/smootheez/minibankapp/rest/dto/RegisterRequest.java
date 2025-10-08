@@ -1,5 +1,6 @@
 package dev.smootheez.minibankapp.rest.dto;
 
+import dev.smootheez.minibankapp.domain.enums.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -26,4 +27,7 @@ public class RegisterRequest {
     @NotBlank(message = "Last name is required")
     @NotNull(message = "Last name is required")
     private String lastName;
+
+    @NotNull(message = "Currency is required")
+    private SupportedCurrency currency;
 }

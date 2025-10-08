@@ -31,6 +31,7 @@ public class AuthService {
         user.setPin(request.getPin());
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
+        user.setCurrency(request.getCurrency());
 
         userRepository.save(user);
 

@@ -1,9 +1,11 @@
 package dev.smootheez.minibankapp.exception;
 
-import dev.smootheez.minibankapp.rest.ApiResponseEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
+import dev.smootheez.minibankapp.rest.*;
+import org.springframework.http.*;
+import org.springframework.web.bind.*;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -11,7 +13,7 @@ public class GlobalExceptionHandler {
     public ApiResponseEntity<Object> handleException(Exception e) {
         return ApiResponseEntity.build(
                 HttpStatus.INTERNAL_SERVER_ERROR,
-                "An unexpected error occurred: " + e.getMessage()
+                "An unexpected error occurred. Please try again later."
         );
     }
 
@@ -29,5 +31,13 @@ public class GlobalExceptionHandler {
                 HttpStatus.UNAUTHORIZED,
                 e.getMessage()
         );
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ApiResponseEntity<Map<String, String>> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                errors.put(error.getField(), error.getDefaultMessage()));
+        return ApiResponseEntity.build(HttpStatus.BAD_REQUEST, errors.values().stream().toList());
     }
 }
