@@ -21,7 +21,7 @@ public class UserEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @NaturalId
+    @NaturalId(mutable = true)
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 

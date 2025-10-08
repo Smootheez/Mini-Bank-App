@@ -42,11 +42,8 @@ public class AuthService {
         log.debug("Logging in user: {}", request);
         var user = userRepository.findByEmail(request.getEmail()).orElse(null);
 
-        String invalidEmailOrPassword = "Invalid email or password";
-        if (user == null) throw new BadCredentialException(invalidEmailOrPassword);
-
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword()))
-            throw new BadCredentialException(invalidEmailOrPassword);
+        if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword()))
+            throw new BadCredentialException("Invalid email or password");
 
         return jwtService.generateToken(user.getEmail());
     }
