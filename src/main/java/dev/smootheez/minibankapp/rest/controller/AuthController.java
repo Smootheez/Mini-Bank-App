@@ -24,7 +24,7 @@ public class AuthController {
     private static final boolean SECURE = false; // False for development "http", change it to true for production "https"
 
     @PostMapping("/register")
-    public ApiResponseEntity<String> register(@Valid @RequestBody RegisterRequest request, HttpServletResponse servletResponse) {
+    public ApiResponseEntity<Object> register(@Valid @RequestBody RegisterRequest request, HttpServletResponse servletResponse) {
         // Set JWT into HttpOnly cookie
         ResponseCookie cookie = ResponseCookie.from(COOKIE_NAME, authService.register(request))
                 .httpOnly(true)
@@ -36,11 +36,11 @@ public class AuthController {
 
         servletResponse.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        return ApiResponseEntity.build(HttpStatus.CREATED, "Registration successfully!", null);
+        return ApiResponseEntity.build(HttpStatus.CREATED, "Registration successfully!");
     }
 
     @PostMapping("/login")
-    public ApiResponseEntity<String> login(@Valid @RequestBody LoginRequest request, HttpServletResponse servletResponse) {
+    public ApiResponseEntity<Object> login(@Valid @RequestBody LoginRequest request, HttpServletResponse servletResponse) {
         // Set JWT into HttpOnly cookie
         ResponseCookie cookie = ResponseCookie.from(COOKIE_NAME, authService.login(request))
                 .httpOnly(true)
@@ -52,11 +52,11 @@ public class AuthController {
 
         servletResponse.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        return ApiResponseEntity.build(HttpStatus.OK, "Login successfully!", null);
+        return ApiResponseEntity.build(HttpStatus.OK, "Login successfully!");
     }
 
     @PostMapping("/logout")
-    public ApiResponseEntity<String> logout(HttpServletResponse servletResponse) {
+    public ApiResponseEntity<Object> logout(HttpServletResponse servletResponse) {
         ResponseCookie cookie = ResponseCookie.from(COOKIE_NAME, "")
                 .httpOnly(true)
                 .secure(SECURE)
@@ -67,6 +67,6 @@ public class AuthController {
 
         servletResponse.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        return ApiResponseEntity.build(HttpStatus.OK, "Logout successfully!", null);
+        return ApiResponseEntity.build(HttpStatus.OK, "Logout successfully!");
     }
 }

@@ -14,4 +14,20 @@ public class GlobalExceptionHandler {
                 "An unexpected error occurred: " + e.getMessage()
         );
     }
+
+    @ExceptionHandler(DuplicateEntityException.class)
+    public ApiResponseEntity<Object> handleDuplicateEntityException(DuplicateEntityException e) {
+        return ApiResponseEntity.build(
+                HttpStatus.CONFLICT,
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler(BadCredentialException.class)
+    public ApiResponseEntity<Object> handleBadCredentialException(BadCredentialException e) {
+        return ApiResponseEntity.build(
+                HttpStatus.UNAUTHORIZED,
+                e.getMessage()
+        );
+    }
 }

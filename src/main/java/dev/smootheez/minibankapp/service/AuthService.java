@@ -14,8 +14,8 @@ import org.springframework.stereotype.*;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    private final UserRepository userRepository;
     private final JwtService jwtService;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     public String register(RegisterRequest request) {
@@ -23,7 +23,7 @@ public class AuthService {
 
         String requestEmail = request.getEmail();
         if (userRepository.existsByEmail(requestEmail))
-            throw new DuplicateEntityException("User with requestEmail " + requestEmail + " already exists");
+            throw new DuplicateEntityException("User with email " + requestEmail + " already exists");
 
         var user = new UserEntity();
         user.setEmail(requestEmail);
@@ -42,13 +42,10 @@ public class AuthService {
         var user = userRepository.findByEmail(request.getEmail()).orElse(null);
 
         String invalidEmailOrPassword = "Invalid email or password";
-        if (user == null) {
-            throw new BadCredentialException(invalidEmailOrPassword);
-        }
+        if (user == null) throw new BadCredentialException(invalidEmailOrPassword);
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword()))
             throw new BadCredentialException(invalidEmailOrPassword);
-        }
 
         return jwtService.generateToken(user.getEmail());
     }

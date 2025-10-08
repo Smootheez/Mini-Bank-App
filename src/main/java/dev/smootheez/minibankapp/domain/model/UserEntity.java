@@ -35,11 +35,11 @@ public class UserEntity {
     private String lastName;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
+    @Column(length = 20, name = "role", nullable = false)
     private UserRole role;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(length = 20, name = "status", nullable = false)
     private UserStatus status;
 
     @Column(name = "balance", nullable = false)

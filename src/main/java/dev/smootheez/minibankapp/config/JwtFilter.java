@@ -25,7 +25,7 @@ public class JwtFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain) throws ServletException, IOException
     {
         String token = null; // The JWT token
-        final String username; // The username of the user
+        final String email; // The email of the user
 
         final String authorizationHeader = request.getHeader("Authorization"); // Get the authorization header from the request
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) { // If the authorization header is null or does not start with "Bearer ", then continue the filter chain
@@ -46,11 +46,11 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        username = jwtService.extractEmail(token); // Extract the username from the token
+        email = jwtService.extractEmail(token); // Extract the email from the token
 
         SecurityContext context = SecurityContextHolder.getContext(); // Get the current security context
-        if (username != null && context.getAuthentication() == null) { // If the username is not null and the authentication is null, then validate the token
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username); // Load the user details from the database
+        if (email != null && context.getAuthentication() == null) { // If the email is not null and the authentication is null, then validate the token
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(email); // Load the user details from the database
             if (jwtService.validateToken(token, userDetails)) { // Validate the token
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails,
