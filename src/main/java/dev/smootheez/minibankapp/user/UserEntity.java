@@ -58,6 +58,9 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DepositEntity> deposits = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WithdrawEntity> withdraws = new ArrayList<>();
+
     @PrePersist
     public void prePersist() {
         if (this.balance == null) this.balance = BigDecimal.ZERO;

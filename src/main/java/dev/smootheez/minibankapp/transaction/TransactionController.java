@@ -28,4 +28,15 @@ public class TransactionController {
         return ApiResponseEntity.build(HttpStatus.CREATED,
                 "Successfully deposited " + response.getAmount() + " " + response.getCurrency() + " to your account", response);
     }
+
+    @PostMapping("/withdraw")
+    public ApiResponseEntity<WithdrawResponse> withdraw(@AuthenticationPrincipal UserDetails userDetails,
+                                                              @Valid @RequestBody WithdrawRequest request)
+    {
+        String email = userDetails.getUsername();
+        log.debug("Withdraw request received for user: {}", email);
+        WithdrawResponse response = transactionSerivce.withdraw(email, request);
+        return ApiResponseEntity.build(HttpStatus.CREATED,
+                "Successfully withdrew " + response.getAmount() + " " + response.getCurrency() + " from your account", response);
+    }
 }
