@@ -40,4 +40,20 @@ public class GlobalExceptionHandler {
                 errors.put(error.getField(), error.getDefaultMessage()));
         return ApiResponseEntity.build(HttpStatus.BAD_REQUEST, errors.values().toArray(String[]::new));
     }
+
+    @ExceptionHandler(CurrencyMismatchException.class)
+    public ApiResponseEntity<Object> handleCurrencyMismatchException(CurrencyMismatchException e) {
+        return ApiResponseEntity.build(
+                HttpStatus.BAD_REQUEST,
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler(InfsufficientFundsException.class)
+    public ApiResponseEntity<Object> handleInfsufficientFundsException(InfsufficientFundsException e) {
+        return ApiResponseEntity.build(
+                HttpStatus.BAD_REQUEST,
+                e.getMessage()
+        );
+    }
 }

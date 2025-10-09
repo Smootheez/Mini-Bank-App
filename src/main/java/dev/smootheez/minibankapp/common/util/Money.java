@@ -1,6 +1,7 @@
 package dev.smootheez.minibankapp.common.util;
 
 import dev.smootheez.minibankapp.common.enums.*;
+import dev.smootheez.minibankapp.common.exception.*;
 import lombok.*;
 
 import java.math.*;
@@ -22,14 +23,14 @@ public record Money(@NonNull BigDecimal amount, @NonNull SupportedCurrency curre
         validateCurrency(money);
         BigDecimal newAmount = amount.subtract(money.amount);
         if (amount.compareTo(money.amount) < 0) {
-            throw new IllegalArgumentException("Insufficient funds");
+            throw new InfsufficientFundsException("Insufficient funds");
         }
         return new Money(newAmount, currency);
     }
 
     private void validateCurrency(Money money) {
         if (!currency.equals(money.currency)) {
-            throw new IllegalArgumentException("Currencies must be the same");
+            throw new CurrencyMismatchException("Currencies must be the same");
         }
     }
 }

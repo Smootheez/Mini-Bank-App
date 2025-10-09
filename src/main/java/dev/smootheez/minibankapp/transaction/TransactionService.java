@@ -14,24 +14,23 @@ import org.springframework.security.crypto.password.*;
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.*;
 
-import java.math.*;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class TransactionSerivce {
+public class TransactionService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final DepositRepository depositRepository;
     private final WithdrawRepository withdrawRepository;
+    private final TransferRepository transferRepository;
+
+    public static final String USER_NOT_FOUND_WITH_EMAIL = "User not found with email: ";
 
     @Transactional
     public DepositResponse deposit(String username, DepositRequest request) {
         log.debug("Processing Deposit request  for user: {}", username);
 
-        var byUser = userRepository.findByEmail(username).orElseThrow(
-                () -> new EntityNotFoundException("User not found with email: " + username)
-        );
+        var byUser = getUserEntity(username, USER_NOT_FOUND_WITH_EMAIL);
 
         validatePin(request.getPin(), byUser);
 
@@ -60,13 +59,17 @@ public class TransactionSerivce {
                 .build();
     }
 
+    private UserEntity getUserEntity(String username, String userNotFoundWithEmail) {
+        return userRepository.findByEmail(username).orElseThrow(
+                () -> new EntityNotFoundException(userNotFoundWithEmail + username)
+        );
+    }
+
     @Transactional
     public WithdrawResponse withdraw(String username, WithdrawRequest request) {
         log.debug("Processing Withdraw request for user: {}", username);
 
-        var byUser = userRepository.findByEmail(username).orElseThrow(
-                () -> new EntityNotFoundException("User not found with email: " + username)
-        );
+        var byUser = getUserEntity(username, USER_NOT_FOUND_WITH_EMAIL);
 
         validatePin(request.getPin(), byUser);
 
@@ -92,6 +95,49 @@ public class TransactionSerivce {
                 .amount(withdraw.getAmount())
                 .currency(withdraw.getCurrency())
                 .createdAt(withdraw.getCreatedAt())
+                .build();
+    }
+
+    @Transactional
+    public TransferResponse transfer(String username, TransferRequest request) {
+        log.debug("Processing Transfer request for user: {}", username);
+
+        var byUser = getUserEntity(username, USER_NOT_FOUND_WITH_EMAIL);
+
+        validatePin(request.getPin(), byUser);
+
+        String toEmail = request.getToEmail();
+        var toUser = getUserEntity(toEmail, "Recipient user not found with email: ");
+
+        SupportedCurrency currency = byUser.getCurrency();
+        Money transferAmount = new Money(request.getAmount(), currency);
+        var totalBalance = BalanceCalculator.transfer(
+                transferAmount,
+                new Money(byUser.getBalance(), currency),
+                new Money(toUser.getBalance(), currency));
+
+        byUser.setBalance(totalBalance.fromBalance().amount());
+        toUser.setBalance(totalBalance.toBalance().amount());
+
+        var transfer = new TransferEntity();
+        transfer.setUser(byUser);
+        transfer.setTransactionId(TransactionIdGenerator.generate("TF"));
+        transfer.setByEmail(byUser.getEmail());
+        transfer.setByName(byUser.getFirstName() + " " + byUser.getLastName());
+        transfer.setToEmail(toUser.getEmail());
+        transfer.setToName(toUser.getFirstName() + " " + toUser.getLastName());
+        transfer.setAmount(transferAmount.amount());
+        transfer.setCurrency(currency);
+
+        transferRepository.save(transfer);
+
+        return TransferResponse.builder()
+                .transactionId(transfer.getTransactionId())
+                .amount(transfer.getAmount())
+                .currency(transfer.getCurrency())
+                .createdAt(transfer.getCreatedAt())
+                .toEmail(transfer.getToEmail())
+                .toName(transfer.getToName())
                 .build();
     }
 

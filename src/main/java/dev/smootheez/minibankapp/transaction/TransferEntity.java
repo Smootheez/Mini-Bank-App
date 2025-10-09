@@ -1,5 +1,6 @@
 package dev.smootheez.minibankapp.transaction;
 
+import dev.smootheez.minibankapp.user.*;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,4 +15,8 @@ public class TransferEntity extends TransactionEntity {
 
     @Column(name = "to_name", nullable = false, updatable = false)
     private String toName;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
 }
