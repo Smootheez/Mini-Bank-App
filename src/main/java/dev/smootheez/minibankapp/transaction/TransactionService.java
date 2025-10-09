@@ -27,10 +27,10 @@ public class TransactionService {
     public static final String USER_NOT_FOUND_WITH_EMAIL = "User not found with email: ";
 
     @Transactional
-    public DepositResponse deposit(String username, DepositRequest request) {
-        log.debug("Processing Deposit request  for user: {}", username);
+    public DepositResponse deposit(String email, DepositRequest request) {
+        log.debug("Processing Deposit request  for user: {}", email);
 
-        var byUser = getUserEntity(username, USER_NOT_FOUND_WITH_EMAIL);
+        var byUser = getUserEntity(email, USER_NOT_FOUND_WITH_EMAIL);
 
         validatePin(request.getPin(), byUser);
 
@@ -59,17 +59,17 @@ public class TransactionService {
                 .build();
     }
 
-    private UserEntity getUserEntity(String username, String userNotFoundWithEmail) {
-        return userRepository.findByEmail(username).orElseThrow(
-                () -> new EntityNotFoundException(userNotFoundWithEmail + username)
+    private UserEntity getUserEntity(String email, String userNotFoundWithEmail) {
+        return userRepository.findByEmail(email).orElseThrow(
+                () -> new EntityNotFoundException(userNotFoundWithEmail + email)
         );
     }
 
     @Transactional
-    public WithdrawResponse withdraw(String username, WithdrawRequest request) {
-        log.debug("Processing Withdraw request for user: {}", username);
+    public WithdrawResponse withdraw(String email, WithdrawRequest request) {
+        log.debug("Processing Withdraw request for user: {}", email);
 
-        var byUser = getUserEntity(username, USER_NOT_FOUND_WITH_EMAIL);
+        var byUser = getUserEntity(email, USER_NOT_FOUND_WITH_EMAIL);
 
         validatePin(request.getPin(), byUser);
 
@@ -99,15 +99,18 @@ public class TransactionService {
     }
 
     @Transactional
-    public TransferResponse transfer(String username, TransferRequest request) {
-        log.debug("Processing Transfer request for user: {}", username);
+    public TransferResponse transfer(String email, TransferRequest request) {
+        log.debug("Processing Transfer request for user: {}", email);
 
-        var byUser = getUserEntity(username, USER_NOT_FOUND_WITH_EMAIL);
+        var byUser = getUserEntity(email, USER_NOT_FOUND_WITH_EMAIL);
 
         validatePin(request.getPin(), byUser);
 
         String toEmail = request.getToEmail();
         var toUser = getUserEntity(toEmail, "Recipient user not found with email: ");
+
+        if (email.equals(toEmail))
+            throw new InvalidTransactionException("You cannot transfer to yourself");
 
         SupportedCurrency currency = byUser.getCurrency();
         Money transferAmount = new Money(request.getAmount(), currency);

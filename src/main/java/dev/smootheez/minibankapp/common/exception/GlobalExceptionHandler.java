@@ -1,6 +1,7 @@
 package dev.smootheez.minibankapp.common.exception;
 
 import dev.smootheez.minibankapp.common.payload.*;
+import jakarta.persistence.*;
 import org.springframework.http.*;
 import org.springframework.web.bind.*;
 import org.springframework.web.bind.annotation.*;
@@ -53,6 +54,30 @@ public class GlobalExceptionHandler {
     public ApiResponseEntity<Object> handleInfsufficientFundsException(InfsufficientFundsException e) {
         return ApiResponseEntity.build(
                 HttpStatus.BAD_REQUEST,
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ApiResponseEntity<Object> handleEntityNotFoundException(EntityNotFoundException e) {
+        return ApiResponseEntity.build(
+                HttpStatus.NOT_FOUND,
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ApiResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException e) {
+        return ApiResponseEntity.build(
+                HttpStatus.BAD_REQUEST,
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler(InvalidTransactionException.class)
+    public ApiResponseEntity<Object> handleInvalidTransactionException(InvalidTransactionException e) {
+        return ApiResponseEntity.build(
+                HttpStatus.NOT_ACCEPTABLE,
                 e.getMessage()
         );
     }
