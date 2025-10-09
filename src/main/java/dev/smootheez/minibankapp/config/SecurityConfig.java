@@ -1,6 +1,6 @@
 package dev.smootheez.minibankapp.config;
 
-import dev.smootheez.minibankapp.*;
+import dev.smootheez.minibankapp.security.*;
 import lombok.*;
 import org.springframework.context.annotation.*;
 import org.springframework.security.authentication.*;
