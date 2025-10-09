@@ -14,18 +14,18 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/transaction/deposit")
-public class DepositController {
-    private final DepositService depositService;
+@RequestMapping("/api/v1/transaction")
+public class TransactionController {
+    private final TransactionSerivce transactionSerivce;
 
-    @PostMapping
-    public ApiResponseEntity<DepositResponse> doTransaction(@AuthenticationPrincipal UserDetails userDetails,
+    @PostMapping("/deposit")
+    public ApiResponseEntity<DepositResponse> deposit(@AuthenticationPrincipal UserDetails userDetails,
                                                             @Valid @RequestBody DepositRequest request)
     {
         String email = userDetails.getUsername();
         log.debug("Deposit request received for user: {}", email);
-        DepositResponse response = depositService.doTransaction(email, request);
+        DepositResponse response = transactionSerivce.deposit(email, request);
         return ApiResponseEntity.build(HttpStatus.CREATED,
-                "Successfully " + response.getAmount() + " " + response.getCurrency() + " to your account", response);
+                "Successfully deposited " + response.getAmount() + " " + response.getCurrency() + " to your account", response);
     }
 }
