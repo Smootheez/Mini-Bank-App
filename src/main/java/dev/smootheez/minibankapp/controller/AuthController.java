@@ -19,7 +19,8 @@ public class AuthController {
     @Value("${jwt.expiration}")
     private long maxAge;
 
-    public static final String COOKIE_NAME = "jwt";
+    private static final String COOKIE_NAME = "jwt"; // Name of the cookie
+    private static final boolean HTTP_ONLY = true; // HttpOnly prevents client-side scripts from accessing the cookie
     private static final String SAME_SITE = "Lax"; // "Strict" for same origins or "Lax" if frontend & backend are different origins
     private static final boolean SECURE = false; // False for development "http", change it to true for production "https"
 
@@ -27,7 +28,7 @@ public class AuthController {
     public ApiResponseEntity<Object> register(@Valid @RequestBody RegisterRequest request, HttpServletResponse servletResponse) {
         // Set JWT into HttpOnly cookie
         ResponseCookie cookie = ResponseCookie.from(COOKIE_NAME, authService.register(request))
-                .httpOnly(true)
+                .httpOnly(HTTP_ONLY)
                 .secure(SECURE) // set to false for local dev if not using HTTPS
                 .sameSite(SAME_SITE)
                 .path("/")
@@ -43,7 +44,7 @@ public class AuthController {
     public ApiResponseEntity<Object> login(@Valid @RequestBody LoginRequest request, HttpServletResponse servletResponse) {
         // Set JWT into HttpOnly cookie
         ResponseCookie cookie = ResponseCookie.from(COOKIE_NAME, authService.login(request))
-                .httpOnly(true)
+                .httpOnly(HTTP_ONLY)
                 .secure(SECURE) // set to false for local dev if not using HTTPS
                 .sameSite(SAME_SITE)
                 .path("/")
@@ -58,7 +59,7 @@ public class AuthController {
     @PostMapping("/logout")
     public ApiResponseEntity<Object> logout(HttpServletResponse servletResponse) {
         ResponseCookie cookie = ResponseCookie.from(COOKIE_NAME, "")
-                .httpOnly(true)
+                .httpOnly(HTTP_ONLY)
                 .secure(SECURE)
                 .sameSite(SAME_SITE)
                 .path("/")
