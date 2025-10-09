@@ -16,36 +16,58 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/transactions")
 public class TransactionController {
-    private final TransactionService transactionService;
+    private final TransactionsManager transactionsManager;
 
     @PostMapping("/deposits")
-    public ApiResponseEntity<DepositResponse> deposit(@AuthenticationPrincipal UserDetails userDetails,
-                                                      @Valid @RequestBody DepositRequest request) {
+    public ApiResponseEntity<DepositResponse> deposit(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody DepositRequest request) {
+
         String email = userDetails.getUsername();
         log.debug("Deposit request received for user: {}", email);
-        DepositResponse response = transactionService.deposit(email, request);
-        return ApiResponseEntity.build(HttpStatus.CREATED,
-                "Successfully deposited " + response.getAmount() + " " + response.getCurrency() + " to your account", response);
+
+        DepositResponse response = transactionsManager.deposit(email, request);
+
+        return ApiResponseEntity.build(
+                HttpStatus.CREATED,
+                "Successfully deposited " + response.getAmount() + " " + response.getCurrency() + " to your account",
+                response
+        );
     }
 
     @PostMapping("/withdraws")
-    public ApiResponseEntity<WithdrawResponse> withdraw(@AuthenticationPrincipal UserDetails userDetails,
-                                                        @Valid @RequestBody WithdrawRequest request) {
+    public ApiResponseEntity<WithdrawResponse> withdraw(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody WithdrawRequest request) {
+
         String email = userDetails.getUsername();
         log.debug("Withdraw request received for user: {}", email);
-        WithdrawResponse response = transactionService.withdraw(email, request);
-        return ApiResponseEntity.build(HttpStatus.OK,
-                "Successfully withdrew " + response.getAmount() + " " + response.getCurrency() + " from your account", response);
+
+        WithdrawResponse response = transactionsManager.withdraw(email, request);
+
+        return ApiResponseEntity.build(
+                HttpStatus.OK,
+                "Successfully withdrew " + response.getAmount() + " " + response.getCurrency() + " from your account",
+                response
+        );
     }
 
     @PostMapping("/transfers")
-    public ApiResponseEntity<TransferResponse> transfer(@AuthenticationPrincipal UserDetails userDetails,
-                                                        @Valid @RequestBody TransferRequest request) {
+    public ApiResponseEntity<TransferResponse> transfer(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody TransferRequest request) {
+
         String email = userDetails.getUsername();
         log.debug("Transfer request received for user: {}", email);
-        TransferResponse response = transactionService.transfer(email, request);
-        return ApiResponseEntity.build(HttpStatus.ACCEPTED,
-                "Successfully transferred " + response.getAmount() + " " + response.getCurrency() + " to " + response.getToEmail(), response);
-    }
 
+        TransferResponse response = transactionsManager.transfer(email, request);
+
+        return ApiResponseEntity.build(
+                HttpStatus.ACCEPTED,
+                "Successfully transferred " + response.getAmount() + " " + response.getCurrency() +
+                        " to " + response.getToEmail(),
+                response
+        );
+    }
 }
+
