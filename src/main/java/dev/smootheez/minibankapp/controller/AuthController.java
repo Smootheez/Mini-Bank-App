@@ -27,15 +27,7 @@ public class AuthController {
     @PostMapping("/register")
     public ApiResponseEntity<Object> register(@Valid @RequestBody RegisterRequest request, HttpServletResponse servletResponse) {
         // Set JWT into HttpOnly cookie
-        ResponseCookie cookie = ResponseCookie.from(COOKIE_NAME, authService.register(request))
-                .httpOnly(HTTP_ONLY)
-                .secure(SECURE) // set to false for local dev if not using HTTPS
-                .sameSite(SAME_SITE)
-                .path("/")
-                .maxAge(maxAge / 1000)
-                .build();
-
-        servletResponse.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        responseCookie(authService.register(request), maxAge / 1000, servletResponse);
 
         return ApiResponseEntity.build(HttpStatus.CREATED, "Registration successfully!");
     }
@@ -43,31 +35,26 @@ public class AuthController {
     @PostMapping("/login")
     public ApiResponseEntity<Object> login(@Valid @RequestBody LoginRequest request, HttpServletResponse servletResponse) {
         // Set JWT into HttpOnly cookie
-        ResponseCookie cookie = ResponseCookie.from(COOKIE_NAME, authService.login(request))
-                .httpOnly(HTTP_ONLY)
-                .secure(SECURE) // set to false for local dev if not using HTTPS
-                .sameSite(SAME_SITE)
-                .path("/")
-                .maxAge(maxAge / 1000)
-                .build();
-
-        servletResponse.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        responseCookie(authService.login(request), maxAge / 1000, servletResponse);
 
         return ApiResponseEntity.build(HttpStatus.OK, "Login successfully!");
     }
 
     @PostMapping("/logout")
     public ApiResponseEntity<Object> logout(HttpServletResponse servletResponse) {
-        ResponseCookie cookie = ResponseCookie.from(COOKIE_NAME, "")
-                .httpOnly(HTTP_ONLY)
-                .secure(SECURE)
-                .sameSite(SAME_SITE)
-                .path("/")
-                .maxAge(0) // Set maxAge to 0 to delete the cookie
-                .build();
-
-        servletResponse.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        // Clear JWT cookie
+        responseCookie("", 0, servletResponse);
 
         return ApiResponseEntity.build(HttpStatus.OK, "Logout successfully!");
+    }
+
+    private void responseCookie(String token, long maxAge, HttpServletResponse servletResponse) {
+        servletResponse.setHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from(COOKIE_NAME, token)
+                .httpOnly(HTTP_ONLY)
+                .secure(SECURE) // set to false for local dev if not using HTTPS
+                .sameSite(SAME_SITE)
+                .path("/")
+                .maxAge(maxAge)
+                .build().toString());
     }
 }
