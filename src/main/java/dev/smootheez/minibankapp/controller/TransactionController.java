@@ -19,10 +19,8 @@ public class TransactionController {
     private final TransactionsManager transactionsManager;
 
     @PostMapping("/deposits")
-    public ApiResponseEntity<DepositResponse> deposit(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @Valid @RequestBody DepositRequest request) {
-
+    public ApiResponseEntity<DepositResponse> deposit(@AuthenticationPrincipal UserDetails userDetails,
+                                                      @Valid @RequestBody DepositRequest request) {
         String email = userDetails.getUsername();
         log.debug("Deposit request received for user: {}", email);
 
@@ -36,10 +34,8 @@ public class TransactionController {
     }
 
     @PostMapping("/withdraws")
-    public ApiResponseEntity<WithdrawResponse> withdraw(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @Valid @RequestBody WithdrawRequest request) {
-
+    public ApiResponseEntity<WithdrawResponse> withdraw(@AuthenticationPrincipal UserDetails userDetails,
+                                                        @Valid @RequestBody WithdrawRequest request) {
         String email = userDetails.getUsername();
         log.debug("Withdraw request received for user: {}", email);
 
@@ -53,10 +49,8 @@ public class TransactionController {
     }
 
     @PostMapping("/transfers")
-    public ApiResponseEntity<TransferResponse> transfer(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @Valid @RequestBody TransferRequest request) {
-
+    public ApiResponseEntity<TransferResponse> transfer(@AuthenticationPrincipal UserDetails userDetails,
+                                                        @Valid @RequestBody TransferRequest request) {
         String email = userDetails.getUsername();
         log.debug("Transfer request received for user: {}", email);
 

@@ -4,8 +4,8 @@ import dev.smootheez.minibankapp.enums.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
-@Builder
 @Getter
+@Builder
 public class RegisterRequest {
     @Email(message = "Invalid email format")
     @NotBlank(message = "Email is required")

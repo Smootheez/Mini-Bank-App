@@ -3,6 +3,7 @@ package dev.smootheez.minibankapp.controller;
 import dev.smootheez.minibankapp.dto.request.*;
 import dev.smootheez.minibankapp.dto.response.*;
 import dev.smootheez.minibankapp.service.*;
+import jakarta.validation.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
 import org.springframework.http.*;
@@ -25,13 +26,21 @@ public class UserController {
                 "Successfully retrieved user info", userService.getUserInfo(email));
     }
 
-    @PutMapping("/me")
-    public ApiResponseEntity<UserInfoResponse> updateUserInfo(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody UserInfoUpdateRequest request) {
+    @PutMapping("/me/password")
+    public ApiResponseEntity<Object> updatePassword(@AuthenticationPrincipal UserDetails userDetails,
+                                                    @Valid @RequestBody UpdatePasswordRequest request) {
         String email = userDetails.getUsername();
-        log.debug("Updating user info for user: {}", email);
-        return ApiResponseEntity.build(HttpStatus.OK,
-                "Successfully updated user info", userService.updateUserInfo(email, request));
+        log.debug("Updating password for user: {}", email);
+        userService.updatePassword(email, request);
+        return ApiResponseEntity.build(HttpStatus.OK, "Password updated successfully");
+    }
+
+    @PutMapping("/me/pin")
+    public ApiResponseEntity<Object> updatePin(@AuthenticationPrincipal UserDetails userDetails,
+                                               @Valid @RequestBody UpdatePinRequest request) {
+        String email = userDetails.getUsername();
+        log.debug("Updating PIN for user: {}", email);
+        userService.updatePin(email, request);
+        return ApiResponseEntity.build(HttpStatus.OK, "PIN updated successfully");
     }
 }

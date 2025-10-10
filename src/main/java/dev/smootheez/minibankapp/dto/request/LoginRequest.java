@@ -3,8 +3,8 @@ package dev.smootheez.minibankapp.dto.request;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
-@Builder
 @Getter
+@Builder
 public class LoginRequest {
     @NotNull(message = "Email cannot be null")
     @NotBlank(message = "Email cannot be blank")

@@ -9,6 +9,7 @@ import lombok.*;
 import org.hibernate.annotations.*;
 
 import java.math.*;
+import java.time.*;
 import java.util.*;
 
 @Getter
@@ -62,6 +63,14 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TransferEntity> transfers = new ArrayList<>();
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 
     @PrePersist
     public void prePersist() {
