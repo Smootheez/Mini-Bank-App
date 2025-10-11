@@ -10,6 +10,6 @@ import lombok.*;
 @Table(name = "deposits")
 public class DepositEntity extends TransactionEntity {
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_email", referencedColumnName = "email", nullable = false, updatable = false)
+    @JoinColumn(name = "user_id", nullable = false, updatable = false)
     private UserEntity user;
 }

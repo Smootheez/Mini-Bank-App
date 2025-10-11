@@ -6,10 +6,11 @@ import dev.smootheez.minibankapp.entity.*;
 import dev.smootheez.minibankapp.enums.*;
 import dev.smootheez.minibankapp.repository.*;
 import dev.smootheez.minibankapp.util.*;
-import lombok.*;
 import lombok.extern.slf4j.*;
 import org.springframework.security.crypto.password.*;
 import org.springframework.stereotype.*;
+
+import java.util.*;
 
 @Slf4j
 @Service
@@ -19,6 +20,10 @@ public class DepositService extends AbstractTransactionService<DepositRequest, D
     protected DepositService(UserRepository userRepository, PasswordEncoder passwordEncoder, DepositRepository depositRepository) {
         super(userRepository, passwordEncoder);
         this.depositRepository = depositRepository;
+    }
+
+    public List<DepositInfoResponse> getAllDepositInfo(String email) {
+        return depositRepository.getAllDepositInfoByUser_Email(email);
     }
 
     @Override

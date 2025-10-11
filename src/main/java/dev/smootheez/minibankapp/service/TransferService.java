@@ -21,6 +21,10 @@ public class TransferService extends AbstractTransactionService<TransferRequest,
         this.transferRepository = transferRepository;
     }
 
+    public java.util.List<TransferInfoResponse> getAllTransferInfo(String email) {
+        return transferRepository.getAllTransferInfoByUser_Email(email);
+    }
+
     @Override
     public TransferResponse doTransaction(String email, TransferRequest request) {
         log.debug("Processing Transfer request for user: {}", email);

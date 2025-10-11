@@ -20,6 +20,10 @@ public class WithdrawService extends AbstractTransactionService<WithdrawRequest,
         this.withdrawRepository = withdrawRepository;
     }
 
+    public java.util.List<WithdrawInfoResponse> getAllWithdrawInfo(String email) {
+        return withdrawRepository.getAllWithdrawInfoByUser_Email(email);
+    }
+
     @Override
     public WithdrawResponse doTransaction(String email, WithdrawRequest request) {
         log.debug("Processing Withdraw request for user: {}", email);

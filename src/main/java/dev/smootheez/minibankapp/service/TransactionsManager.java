@@ -6,6 +6,8 @@ import lombok.*;
 import lombok.extern.slf4j.*;
 import org.springframework.stereotype.*;
 
+import java.util.*;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -25,5 +27,18 @@ public class TransactionsManager {
     public TransferResponse transfer(String email, TransferRequest request) {
         return transferService.doTransaction(email, request);
     }
+
+    public List<DepositInfoResponse> getAllDepositInfo(String email) {
+        return depositService.getAllDepositInfo(email);
+    }
+
+    public List<WithdrawInfoResponse> getAllWithdrawInfo(String email) {
+        return withdrawService.getAllWithdrawInfo(email);
+    }
+
+    public List<TransferInfoResponse> getAllTransferInfo(String email) {
+        return transferService.getAllTransferInfo(email);
+    }
+
 }
 
