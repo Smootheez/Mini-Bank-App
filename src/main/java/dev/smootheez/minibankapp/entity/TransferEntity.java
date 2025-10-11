@@ -16,6 +16,10 @@ public class TransferEntity extends TransactionEntity {
     private String toName;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id", nullable = false, updatable = false)
-    private UserEntity user;
+    @JoinColumn(name = "by_user_id", nullable = false, updatable = false)
+    private UserEntity byUser;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "to_user_id", nullable = false, updatable = false)
+    private UserEntity toUser;
 }

@@ -11,6 +11,8 @@ import lombok.extern.slf4j.*;
 import org.springframework.security.crypto.password.*;
 import org.springframework.stereotype.*;
 
+import java.util.*;
+
 @Slf4j
 @Service
 public class TransferService extends AbstractTransactionService<TransferRequest, TransferResponse> {
@@ -21,8 +23,8 @@ public class TransferService extends AbstractTransactionService<TransferRequest,
         this.transferRepository = transferRepository;
     }
 
-    public java.util.List<TransferInfoResponse> getAllTransferInfo(String email) {
-        return transferRepository.getAllTransferInfoByUser_Email(email);
+    public List<TransferInfoResponse> getAllTransferInfo(String email) {
+        return transferRepository.getAllTransferInfoByByUser_Email(email);
     }
 
     @Override
@@ -49,7 +51,8 @@ public class TransferService extends AbstractTransactionService<TransferRequest,
         toUser.setBalance(totalBalance.toBalance().amount());
 
         var transfer = new TransferEntity();
-        transfer.setUser(byUser);
+        transfer.setByUser(byUser);
+        transfer.setToUser(toUser);
         transfer.setTransactionId(TransactionIdGenerator.generate("TF"));
         transfer.setByEmail(byUser.getEmail());
         transfer.setByName(byUser.getFirstName() + " " + byUser.getLastName());

@@ -9,5 +9,5 @@ import java.util.*;
 
 @Repository
 public interface TransferRepository extends JpaRepository<TransferEntity, Long>, TransactionRepository<TransferEntity> {
-    List<TransferInfoResponse> getAllTransferInfoByUser_Email(String email);
+    List<TransferInfoResponse> getAllTransferInfoByByUser_Email(String email);
 }

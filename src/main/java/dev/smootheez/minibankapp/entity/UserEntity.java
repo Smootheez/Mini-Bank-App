@@ -61,7 +61,7 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WithdrawEntity> withdraws = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "byUser", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TransferEntity> transfers = new ArrayList<>();
 
     @CreationTimestamp
