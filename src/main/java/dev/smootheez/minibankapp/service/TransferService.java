@@ -24,7 +24,7 @@ public class TransferService extends AbstractTransactionService<TransferRequest,
     }
 
     public List<TransferInfoResponse> getAllTransferInfo(String email) {
-        return transferRepository.getAllTransferInfoByByUser_Email(email);
+        return transferRepository.getAllTransferInfoByUserEmail(email);
     }
 
     @Override
