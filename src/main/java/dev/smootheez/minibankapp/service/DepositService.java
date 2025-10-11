@@ -23,6 +23,7 @@ public class DepositService extends AbstractTransactionService<DepositRequest, D
     }
 
     public List<DepositInfoResponse> getAllDepositInfo(String email) {
+        log.debug("Processing get all deposit info request for user: {}", email);
         return depositRepository.getAllDepositInfoByUser_Email(email);
     }
 
@@ -33,10 +34,9 @@ public class DepositService extends AbstractTransactionService<DepositRequest, D
         var byUser = getUserEntity(email, USER_NOT_FOUND_WITH_EMAIL);
         validatePin(request.getPin(), byUser);
 
-        SupportedCurrency currency = byUser.getCurrency();
-        Money depositAmount = new Money(request.getAmount(), currency);
-        Money totalBalance = BalanceCalculator.deposite(depositAmount,
-                new Money(byUser.getBalance(), currency));
+        Money depositAmount = new Money(request.getAmount(), request.getCurrency());
+        Money totalBalance = BalanceCalculator.deposit(depositAmount,
+                new Money(byUser.getBalance(), byUser.getCurrency()));
 
         byUser.setBalance(totalBalance.amount());
 
@@ -46,7 +46,7 @@ public class DepositService extends AbstractTransactionService<DepositRequest, D
         deposit.setByEmail(byUser.getEmail());
         deposit.setByName(byUser.getFirstName() + " " + byUser.getLastName());
         deposit.setAmount(depositAmount.amount());
-        deposit.setCurrency(currency);
+        deposit.setCurrency(depositAmount.currency());
 
         depositRepository.save(deposit);
 

@@ -21,6 +21,7 @@ public class WithdrawService extends AbstractTransactionService<WithdrawRequest,
     }
 
     public java.util.List<WithdrawInfoResponse> getAllWithdrawInfo(String email) {
+        log.debug("Processing get all withdraw info request for user: {}", email);
         return withdrawRepository.getAllWithdrawInfoByUser_Email(email);
     }
 
@@ -31,10 +32,9 @@ public class WithdrawService extends AbstractTransactionService<WithdrawRequest,
         var byUser = getUserEntity(email, USER_NOT_FOUND_WITH_EMAIL);
         validatePin(request.getPin(), byUser);
 
-        SupportedCurrency currency = byUser.getCurrency();
-        Money withdrawAmount = new Money(request.getAmount(), currency);
+        Money withdrawAmount = new Money(request.getAmount(), request.getCurrency());
         Money totalBalance = BalanceCalculator.withdraw(withdrawAmount,
-                new Money(byUser.getBalance(), currency));
+                new Money(byUser.getBalance(), byUser.getCurrency()));
 
         byUser.setBalance(totalBalance.amount());
 
@@ -44,7 +44,7 @@ public class WithdrawService extends AbstractTransactionService<WithdrawRequest,
         withdraw.setByEmail(byUser.getEmail());
         withdraw.setByName(byUser.getFirstName() + " " + byUser.getLastName());
         withdraw.setAmount(withdrawAmount.amount());
-        withdraw.setCurrency(currency);
+        withdraw.setCurrency(withdrawAmount.currency());
 
         withdrawRepository.save(withdraw);
 

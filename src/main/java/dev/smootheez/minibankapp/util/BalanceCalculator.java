@@ -4,7 +4,7 @@ import lombok.experimental.*;
 
 @UtilityClass
 public class BalanceCalculator {
-    public Money deposite(Money amount, Money balance) {
+    public Money deposit(Money amount, Money balance) {
         return balance.add(amount);
     }
 
@@ -14,7 +14,8 @@ public class BalanceCalculator {
 
     public TransferResult transfer(Money amount, Money fromBalance, Money toBalance) {
         Money newFromBalance = withdraw(amount, fromBalance);
-        Money newToBalance = deposite(amount, toBalance);
+        Money convertedAmount = amount.convertTo(toBalance.currency());
+        Money newToBalance = deposit(convertedAmount, toBalance);
         return new TransferResult(newFromBalance, newToBalance);
     }
 

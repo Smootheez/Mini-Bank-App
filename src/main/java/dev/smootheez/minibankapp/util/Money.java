@@ -14,23 +14,21 @@ public record Money(@NonNull BigDecimal amount, @NonNull SupportedCurrency curre
         amount = amount.setScale(2, RoundingMode.HALF_UP);
     }
 
-    public Money add(Money money) {
-        validateCurrency(money);
-        return new Money(amount.add(money.amount), currency);
+    public Money add(Money other) {
+        BigDecimal convertedAmount = CurrencyConverter.convert(other, this.currency).amount();
+        return new Money(amount.add(convertedAmount), currency);
     }
 
-    public Money subtract(Money money) {
-        validateCurrency(money);
-        BigDecimal newAmount = amount.subtract(money.amount);
-        if (amount.compareTo(money.amount) < 0) {
-            throw new InfsufficientFundsException("Insufficient funds");
+    public Money subtract(Money other) {
+        BigDecimal convertedAmount = CurrencyConverter.convert(other, this.currency).amount();
+        BigDecimal newAmount = amount.subtract(convertedAmount);
+        if (newAmount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new InsufficientFundsException("Insufficient funds");
         }
         return new Money(newAmount, currency);
     }
 
-    private void validateCurrency(Money money) {
-        if (!currency.equals(money.currency)) {
-            throw new CurrencyMismatchException("Currencies must be the same");
-        }
+    public Money convertTo(SupportedCurrency targetCurrency) {
+        return CurrencyConverter.convert(this, targetCurrency);
     }
 }

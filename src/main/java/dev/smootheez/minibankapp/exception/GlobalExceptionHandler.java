@@ -11,7 +11,7 @@ import java.util.*;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
-    public ApiResponseEntity<Object> handleException(Exception e) {
+    public ApiResponseEntity<String> handleException(Exception e) {
         return ApiResponseEntity.build(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "An unexpected error occurred. Please try again later."
@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DuplicateEntityException.class)
-    public ApiResponseEntity<Object> handleDuplicateEntityException(DuplicateEntityException e) {
+    public ApiResponseEntity<String> handleDuplicateEntityException(DuplicateEntityException e) {
         return ApiResponseEntity.build(
                 HttpStatus.CONFLICT,
                 e.getMessage()
@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BadCredentialException.class)
-    public ApiResponseEntity<Object> handleBadCredentialException(BadCredentialException e) {
+    public ApiResponseEntity<String> handleBadCredentialException(BadCredentialException e) {
         return ApiResponseEntity.build(
                 HttpStatus.UNAUTHORIZED,
                 e.getMessage()
@@ -43,15 +43,15 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(CurrencyMismatchException.class)
-    public ApiResponseEntity<Object> handleCurrencyMismatchException(CurrencyMismatchException e) {
+    public ApiResponseEntity<String> handleCurrencyMismatchException(CurrencyMismatchException e) {
         return ApiResponseEntity.build(
                 HttpStatus.BAD_REQUEST,
                 e.getMessage()
         );
     }
 
-    @ExceptionHandler(InfsufficientFundsException.class)
-    public ApiResponseEntity<Object> handleInfsufficientFundsException(InfsufficientFundsException e) {
+    @ExceptionHandler(InsufficientFundsException.class)
+    public ApiResponseEntity<String> handleInfsufficientFundsException(InsufficientFundsException e) {
         return ApiResponseEntity.build(
                 HttpStatus.BAD_REQUEST,
                 e.getMessage()
@@ -59,7 +59,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ApiResponseEntity<Object> handleEntityNotFoundException(EntityNotFoundException e) {
+    public ApiResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException e) {
         return ApiResponseEntity.build(
                 HttpStatus.NOT_FOUND,
                 e.getMessage()
@@ -67,7 +67,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ApiResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException e) {
+    public ApiResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
         return ApiResponseEntity.build(
                 HttpStatus.BAD_REQUEST,
                 e.getMessage()
@@ -78,6 +78,14 @@ public class GlobalExceptionHandler {
     public ApiResponseEntity<Object> handleInvalidTransactionException(InvalidTransactionException e) {
         return ApiResponseEntity.build(
                 HttpStatus.NOT_ACCEPTABLE,
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler(UnsupportedOperationException.class)
+    public ApiResponseEntity<String> handleUnsupportedOperationException(UnsupportedOperationException e) {
+        return ApiResponseEntity.build(
+                HttpStatus.NOT_IMPLEMENTED,
                 e.getMessage()
         );
     }

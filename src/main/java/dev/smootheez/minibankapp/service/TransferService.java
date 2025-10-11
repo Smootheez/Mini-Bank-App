@@ -38,12 +38,12 @@ public class TransferService extends AbstractTransactionService<TransferRequest,
         if (email.equals(toEmail))
             throw new InvalidTransactionException("You cannot transfer to yourself");
 
-        SupportedCurrency currency = byUser.getCurrency();
-        Money transferAmount = new Money(request.getAmount(), currency);
+        SupportedCurrency byUserCurrency = byUser.getCurrency();
+        Money transferAmount = new Money(request.getAmount(), byUserCurrency);
         var totalBalance = BalanceCalculator.transfer(
                 transferAmount,
-                new Money(byUser.getBalance(), currency),
-                new Money(toUser.getBalance(), currency));
+                new Money(byUser.getBalance(), byUserCurrency),
+                new Money(toUser.getBalance(), toUser.getCurrency()));
 
         byUser.setBalance(totalBalance.fromBalance().amount());
         toUser.setBalance(totalBalance.toBalance().amount());
@@ -56,7 +56,7 @@ public class TransferService extends AbstractTransactionService<TransferRequest,
         transfer.setToEmail(toUser.getEmail());
         transfer.setToName(toUser.getFirstName() + " " + toUser.getLastName());
         transfer.setAmount(transferAmount.amount());
-        transfer.setCurrency(currency);
+        transfer.setCurrency(transferAmount.currency());
 
         transferRepository.save(transfer);
 
