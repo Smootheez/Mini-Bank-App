@@ -12,13 +12,20 @@ import java.time.*;
 public interface WithdrawInfoResponse {
     String getTransactionId();
 
-    String getByEmail();
-
-    String getByName();
-
     BigDecimal getAmount();
 
     SupportedCurrency getCurrency();
 
     Instant getCreatedAt();
+
+    UserEntityInfo getUser();
+
+    /**
+     * Projection for {@link UserEntity}
+     */
+    interface UserEntityInfo {
+        String getEmail();
+
+        String getName();
+    }
 }

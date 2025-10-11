@@ -41,8 +41,6 @@ public class WithdrawService extends AbstractTransactionService<WithdrawRequest,
         var withdraw = new WithdrawEntity();
         withdraw.setUser(byUser);
         withdraw.setTransactionId(TransactionIdGenerator.generate("WD"));
-        withdraw.setByEmail(byUser.getEmail());
-        withdraw.setByName(byUser.getFirstName() + " " + byUser.getLastName());
         withdraw.setAmount(withdrawAmount.amount());
         withdraw.setCurrency(withdrawAmount.currency());
 

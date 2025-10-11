@@ -3,7 +3,6 @@ package dev.smootheez.minibankapp.service;
 import dev.smootheez.minibankapp.dto.request.*;
 import dev.smootheez.minibankapp.dto.response.*;
 import dev.smootheez.minibankapp.entity.*;
-import dev.smootheez.minibankapp.enums.*;
 import dev.smootheez.minibankapp.repository.*;
 import dev.smootheez.minibankapp.util.*;
 import lombok.extern.slf4j.*;
@@ -43,8 +42,6 @@ public class DepositService extends AbstractTransactionService<DepositRequest, D
         var deposit = new DepositEntity();
         deposit.setUser(byUser);
         deposit.setTransactionId(TransactionIdGenerator.generate("DP"));
-        deposit.setByEmail(byUser.getEmail());
-        deposit.setByName(byUser.getFirstName() + " " + byUser.getLastName());
         deposit.setAmount(depositAmount.amount());
         deposit.setCurrency(depositAmount.currency());
 

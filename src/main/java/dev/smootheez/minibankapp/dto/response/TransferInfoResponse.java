@@ -12,17 +12,22 @@ import java.time.*;
 public interface TransferInfoResponse {
     String getTransactionId();
 
-    String getByEmail();
-
-    String getByName();
-
-    String getToEmail();
-
-    String getToName();
-
     BigDecimal getAmount();
 
     SupportedCurrency getCurrency();
 
     Instant getCreatedAt();
+
+    UserEntityInfo getByUser();
+
+    UserEntityInfo getToUser();
+
+    /**
+     * Projection for {@link UserEntity}
+     */
+    interface UserEntityInfo {
+        String getEmail();
+
+        String getName();
+    }
 }

@@ -40,6 +40,9 @@ public class UserEntity {
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
+    @Column(name = "name", nullable = false)
+    private String name;
+
     @Enumerated(EnumType.STRING)
     @Column(length = 20, name = "role", nullable = false)
     private UserRole role;

@@ -60,8 +60,7 @@ public class TransactionController {
 
         return ApiResponseEntity.build(
                 HttpStatus.ACCEPTED,
-                "Successfully transferred " + response.getAmount() + " " + response.getCurrency() +
-                        " to " + response.getToEmail(),
+                "Successfully transferred " + response.getAmount() + " " + response.getCurrency(),
                 response
         );
     }

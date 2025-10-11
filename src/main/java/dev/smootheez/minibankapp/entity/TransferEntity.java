@@ -9,12 +9,6 @@ import lombok.*;
 @DiscriminatorValue("TRANSFER")
 @Table(name = "transfers")
 public class TransferEntity extends TransactionEntity {
-    @Column(name = "to_email", nullable = false, updatable = false)
-    private String toEmail;
-
-    @Column(name = "to_name", nullable = false, updatable = false)
-    private String toName;
-
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "by_user_id", nullable = false, updatable = false)
     private UserEntity byUser;

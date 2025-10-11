@@ -14,7 +14,7 @@ import java.time.*;
 @Setter
 @Entity
 @Table(name = "transactions", indexes = {
-        @Index(name = "idx_transactions", columnList = "transaction_id, by_email")
+        @Index(name = "idx_transactions", columnList = "transaction_id")
 })
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "transaction_type", discriminatorType = DiscriminatorType.STRING)
@@ -27,12 +27,6 @@ public class TransactionEntity {
     @NaturalId
     @Column(name = "transaction_id", nullable = false, unique = true)
     private String transactionId;
-
-    @Column(name = "by_email", nullable = false, updatable = false)
-    private String byEmail;
-
-    @Column(name = "by_name", nullable = false, updatable = false)
-    private String byName;
 
     @Column(name = "amount", nullable = false)
     private BigDecimal amount;

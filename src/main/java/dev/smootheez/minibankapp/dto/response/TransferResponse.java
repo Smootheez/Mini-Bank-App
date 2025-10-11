@@ -6,8 +6,6 @@ import lombok.experimental.*;
 
 @Getter
 @SuperBuilder
-@JsonPropertyOrder({"transactionId", "toName", "toEmail", "amount", "currency", "createdAt"})
+@JsonPropertyOrder({"transactionId", "amount", "currency", "createdAt"})
 public class TransferResponse extends TransactionResponse {
-    private String toEmail;
-    private String toName;
 }

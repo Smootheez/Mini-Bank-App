@@ -28,8 +28,11 @@ public class AuthService {
         user.setEmail(requestEmail);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setPin(passwordEncoder.encode(request.getPin()));
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
+        String firstName = request.getFirstName();
+        user.setFirstName(firstName);
+        String lastName = request.getLastName();
+        user.setLastName(lastName);
+        user.setName(firstName + " " + lastName);
         user.setCurrency(request.getCurrency());
 
         userRepository.save(user);
