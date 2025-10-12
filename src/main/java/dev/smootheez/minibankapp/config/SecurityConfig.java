@@ -1,5 +1,6 @@
 package dev.smootheez.minibankapp.config;
 
+import dev.smootheez.minibankapp.handler.*;
 import dev.smootheez.minibankapp.security.*;
 import lombok.*;
 import org.springframework.context.annotation.*;
@@ -25,20 +26,25 @@ import org.springframework.security.web.authentication.*;
 public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final JwtFilter jwtFilter;
+    private final AppAccessDeniedHandler appAccessDeniedHandler;
+    private final AppAuthenticationEntryPoint appAuthenticationEntryPoint;
 
     // Security filter chain to handle authentication and authorization
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable) // Disable CSRF
                 .authorizeHttpRequests(authorize ->
-                        authorize.requestMatchers("/api/v1/auth/**") // Allow all requests to the authentication endpoints
-                                .permitAll()
+                        authorize.requestMatchers("/api/v1/auth/register", "/api/v1/auth/login")
+                                .anonymous() // Only allow anonymous users
                                 .anyRequest()
                                 .authenticated()) // Require authentication for all other requests
-                .authenticationProvider(authenticationProvider()) // Add the authentication provider
+                .authenticationProvider(authenticationProvider())
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Disable sessions
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) // Add the JWT filter before the UsernamePasswordAuthenticationFilter
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exception ->
+                        exception.accessDeniedHandler(appAccessDeniedHandler)
+                                .authenticationEntryPoint(appAuthenticationEntryPoint))
                 .build();
     }
 
@@ -58,7 +64,7 @@ public class SecurityConfig {
 
     // Authentication manager
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception{
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
 }
